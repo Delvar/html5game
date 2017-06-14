@@ -1,2 +1,3 @@
 # html5game
-Just a test for some simple HTML 5 gamey things
+Just a test for some simple HTML 5 gamey things.
+Not much to see here....
