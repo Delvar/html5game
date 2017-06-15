@@ -21,7 +21,6 @@ require.config({
 
 requirejs(['Game'],
 	function (Game) {
-	    game = new Game();
-	    game.start();
-	}
-);
+	game = new Game();
+	game.start();
+});
