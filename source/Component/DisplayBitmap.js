@@ -3,7 +3,6 @@ define(
 	['Component', 'easel', 
 		'Component/EaselWrap', ],
 	function (Component, createjs) {
-
 	function DisplayBitmap(imageOrUri) {
 		Component.EaselWrap.call(this);
 

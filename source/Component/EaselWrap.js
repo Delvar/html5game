@@ -1,7 +1,7 @@
 define(
 	'Component/EaselWrap',
 	['Core', 'Component', 'easel',
-		'Core/Component', ],
+		'Core/Component'],
 	function (Core, Component, createjs) {
 
 	function EaselWrap(text, font, color) {

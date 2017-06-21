@@ -2,7 +2,6 @@ define(
 	'Core/Vector2',
 	['Core'],
 	function (Core) {
-
 	function Vector2(x, y) {
 		if (x instanceof Vector2) {
 			this.x = x.x;

@@ -6,7 +6,7 @@ define(
 
 	function DisplayText(text, font, color) {
 		Component.EaselWrap.call(this);
-		this.setWrapped( new createjs.Text(text, font, color) );
+		this.setWrapped(new createjs.Text(text, font, color));
 	}
 
 	DisplayText.prototype = Object.create(Component.EaselWrap.prototype);

@@ -1,9 +1,8 @@
 define(
 	'Core/Vector3',
-	['Core', 
+	['Core',
 		'Core/Vector2'],
 	function (Core) {
-
 	function Vector3(x, y, z) {
 		if (x instanceof Vector3) {
 			Core.Vector2.call(this, x.x, x.y);

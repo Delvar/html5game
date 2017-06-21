@@ -1,7 +1,7 @@
 define(
 	'EaselDisplay',
 	['underscore', 'easel', 'preload', 'Component',
-		'Component/DisplayContainer'],
+		'Component/Transform'],
 
 	function (_, createjs, preload, Component) {
 	function EaselDisplay() {
@@ -48,11 +48,7 @@ define(
 		 */
 		var that = this;
 
-		_.each(this.currentScene.children, function (child) {
-			_.each(child.getComponentsByType(Component.DisplayContainer), function (displayContainer) {
-				that.stage.addChild(displayContainer.getContainerObject());
-			});
-		});
+		this.stage.addChild(this.currentScene.transform.getContainerObject());
 
 		createjs.Ticker.setFPS(30);
 
