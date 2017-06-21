@@ -1594,7 +1594,6 @@ var requirejs, require, define;
                 //Do this after the cycle of callGetModule in case the result
                 //of those calls/init calls changes the registry.
                 mod = getOwn(registry, moduleName);
-
                 if (!found && !hasProp(defined, moduleName) && mod && !mod.inited) {
                     if (config.enforceDefine && (!shExports || !getGlobal(shExports))) {
                         if (hasPathFallback(moduleName)) {

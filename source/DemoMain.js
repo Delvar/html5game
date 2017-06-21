@@ -9,19 +9,18 @@ require.config({
 			exports: 'createjs'
 		},
 		'underscore': {
-			exports: '_',
+			exportsx: '_',
 		}
 	},
 	paths: {
 		easel: 'libs/easeljs-0.8.2.combined',
 		preload: 'libs/preloadjs-0.6.2.combined',
-		//underscore: 'libs/underscore', // migrated to lodash, the clone function seems to actualy work.
-		underscore: 'libs/lodash-4.17.4'
+		underscore: 'libs/underscore'
 	}
 });
 
-requirejs(['Game'],
-	function (Game) {
-	game = new Game();
+requirejs(['DemoGame'],
+	function (DemoGame) {
+	game = new DemoGame();
 	game.start();
 });

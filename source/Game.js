@@ -1,20 +1,18 @@
 define(
-    'Game',
-    ['EaselDisplay', 'DemoModule', 'underscore'],
-    function (EaselDisplay, DemoModule, _) {
-        function Game (options) {
-			this.display = new EaselDisplay();
-			var defaults = {
-                module: new DemoModule()
-            };
-            this.settings = _.extend(defaults, options);
-        };
+	'Game',
+	['EaselDisplay', 'FlightModule', 'underscore'],
+	function (EaselDisplay, FlightModule, _) {
+	function Game(options) {
+		this.display = new EaselDisplay();
+		var defaults = {
+			module: new FlightModule(this.display, this.options)
+		};
+		this.settings = _.extend(defaults, options);
+	};
 
-        Game.prototype.start = function() {
-            //alert("Start");
-			this.settings.module.run(this.display);
-        };
+	Game.prototype.start = function () {
+		this.settings.module.run();
+	};
 
-        return Game;
-    }
-);
+	return Game;
+});

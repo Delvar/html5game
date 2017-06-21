@@ -9,29 +9,35 @@
   <title></title>
   <meta name="description" content="">
 
-  <meta name="viewport" content="width=device-width">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/normalize.css">
+   <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" href="css/style.css">
-
-<script src="source/libs/easeljs-0.8.2.combined.js"></script>
-<script src="source/libs/preloadjs-0.6.2.combined.js"></script>
-<script src="source/experimental/easeljs.test.js"></script>
+  <script src="source/libs/modernizr-2.5.3.min.js"></script>
+  
+  <!-- meta name="viewport" content="width=device-width" -->
+  <!-- link rel="stylesheet" href="css/main.css" -->
+  <!-- link rel="stylesheet" href="css/normalize.css" -->
+  <!-- link rel="stylesheet" href="css/style.css" -->
   
 </head>
-<body onload="init();">
+<body>
   <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
     <header>
 
     </header>
-    <div role="main" style="font-size: 0px;">
+    <div role="main">
         <div id="container"></div>
         <div id="container2"></div>
-        <canvas id="testCanvas" width="300" height="100" style="background-color: black;"></canvas>
+        <canvas id="canvas" width="1024" height="768"></canvas>
     </div>
     <footer>
 
     </footer>
+	
+<script> 
+var someshit = { testing: 'testing' };
+</script>
+
+    <script data-main="source/DemoMain" src="source/libs/require.js"></script>
 
 </body>
 </html>

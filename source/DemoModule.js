@@ -1,18 +1,47 @@
 define(
-	'DemoModule',
-	[],
-	function () {
-	function DemoModule(display) {
-		this.display = display;
-	}
+    'DemoModule',
+    [
+        'Character', 'DemoScene', 'config/scripts/CharacterController',
+        'config/locales/churchyard',
+        'config/characters/player-character', 'SetPiece'
+    ],
+    function (
+        Character, DemoScene, CharacterController,
+        localeConfig, characterConfig,
+        SetPiece
+    ) {
+        function DemoModule (display) {
+            this.display = display;
+        }
 
-	DemoModule.prototype.run = function (display) {
-		//var scene = new Scene(setPieces, characters, spriteConfig, scripts);
-		//display.runScene(scene);
-		alert("DemoModule.run");
-		console.log(display);
+        DemoModule.prototype.run = function () {
+            var setPieces = {},
+                characters = {'player-character': new Character(characterConfig)},                
+                spriteConfig = [],
+                scripts = [];
 
-	};
+            scripts.push(new CharacterController('player-character'));
 
-	return DemoModule;
-});
+            _.each(localeConfig.setPieces, function (config, setPieceName) {
+                setPieces[setPieceName] = new SetPiece(config);
+            });
+
+            _.each(localeConfig.scripts, function (script) {
+                scripts.push(script);
+            });
+
+            _.each(localeConfig.sprites, function(config) {
+                spriteConfig.push(config);
+            });
+
+            _.each(characterConfig.sprites, function(config) {
+                spriteConfig.push(config);
+            });
+
+            var scene = new DemoScene(setPieces, characters, spriteConfig, scripts);
+            this.display.runScene(scene);
+        };
+
+        return DemoModule;
+    }
+);
