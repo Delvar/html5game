@@ -207,7 +207,7 @@ function handleComplete() {
 
 function tick(event) {
 	
-	fpsText.text=(createjs.Ticker.getMeasuredFPS()).toFixed(2);
+	fpsText.text = (createjs.Ticker.getMeasuredFPS()).toFixed(2);
 	
 	smallfighter.rotation = (smallfighter.rotation + Math.sin(event.runTime/5000) )%360;
 	//smallfighter.scaleX = smallfighter.scaleY = 0.2 + ((Math.sin(smallfighter.rotation / 100) + 1) * 0.4);

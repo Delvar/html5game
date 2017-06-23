@@ -39,6 +39,19 @@ define(
 		return r;
 	}
 
+	GameObject.prototype.getComponentsByTypes = function (types) {
+		var r = [];
+
+		_.each(this.components, function (component) {
+			_.each(types, function (type) {
+				if (component instanceof type) {
+					r.push(component);
+				};
+			});
+		});
+		return r;
+	}
+
 	GameObject.prototype.getComponents = function () {
 		return this.components;
 	}

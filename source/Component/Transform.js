@@ -1,8 +1,8 @@
 define(
 	'Component/Transform',
-	['Core', 'Component', 'easel',
-		'Core/Component', 'Core/Vector2', 'Component/EaselWrap'],
-	function (Core, Component, createjs) {
+	['Core', 'Component',
+		'Core/Component', 'Core/Vector2'],
+	function (Core, Component) {
 
 	function Transform() {
 		Core.Component.call(this);
@@ -12,8 +12,6 @@ define(
 
 		this.parent = undefined;
 		this.children = new Array();
-
-		this.containerObject = new createjs.Container();
 	}
 
 	Transform.prototype = Object.create(Core.Component.prototype);
@@ -71,34 +69,40 @@ define(
 		}
 		return this;
 	};
-
+	/*
 	Transform.prototype.getContainerObject = function () {
-		return this.containerObject;
+	return this.containerObject;
 	};
 
 	Transform.prototype.setContainerObject = function (containerObject) {
-		this.containerObject = containerObject;
-		return this;
+	this.containerObject = containerObject;
+	return this;
 	};
 
 	Transform.prototype.Awake = function () {
-		Core.Component.prototype.Awake.call(this);
-		var that = this;
-		//FIXME: needs to be moved out to cammera functions for world to screen space/scale conversion.
-		this.containerObject.x = this.localPosition.x;
-		this.containerObject.y = this.localPosition.y;
-		_.each(this.gameObject.getComponentsByType(Component.EaselWrap), function (easelWrap) {
-			if (!(easelWrap instanceof Component.Transform)) {
-				that.containerObject.addChild(easelWrap.getWrapped());
-			}
-		});
-		//for each child game game object we go and get the containers and append to our container.
-		_.each(this.children, function (child) {
-			that.containerObject.addChild(child.getContainerObject());
-		});
+	Core.Component.prototype.Awake.call(this);
+	var that = this;
+	//FIXME: needs to be moved out to cammera functions for world to screen space/scale conversion.
+	this.containerObject.x = this.localPosition.x;
+	this.containerObject.y = this.localPosition.y;
+	_.each(this.gameObject.getComponentsByType(Component.EaselWrap), function (easelWrap) {
+	if (!(easelWrap instanceof Component.Transform)) {
+	that.containerObject.addChild(easelWrap.getWrapped());
+	}
+	});
+	//for each child game game object we go and get the containers and append to our container.
+	_.each(this.children, function (child) {
+	that.containerObject.addChild(child.getContainerObject());
+	});
 	};
 
-
+	Transform.prototype.Update = function () {
+	Core.Component.prototype.Update.call(this);
+	this.containerObject.x = this.localPosition.x;
+	this.containerObject.y = this.localPosition.y;
+	this.containerObject.rotation = this.localRotation;
+	}
+	 */
 	Component.Transform = Transform;
 	return Transform;
 });

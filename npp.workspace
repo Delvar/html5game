@@ -1,0 +1,71 @@
+<NotepadPlus>
+    <Project name="html5game">
+        <Folder name="source">
+            <Folder name="Component">
+                <File name="source\Component\Camera.js" />
+                <File name="source\Component\DisplayBitmap.js" />
+                <File name="source\Component\DisplayItem.js" />
+                <File name="source\Component\DisplayText.js" />
+                <File name="source\Component\Transform.js" />
+            </Folder>
+            <Folder name="config">
+                <Folder name="characters">
+                    <File name="source\config\characters\player-character.js" />
+                </Folder>
+                <Folder name="locales">
+                    <File name="source\config\locales\churchyard.js" />
+                    <File name="source\config\locales\kakariko-village.json" />
+                </Folder>
+                <Folder name="scripts">
+                    <File name="source\config\scripts\CharacterController.js" />
+                    <File name="source\config\scripts\DoorOpener.js" />
+                </Folder>
+            </Folder>
+            <Folder name="Core">
+                <File name="source\Core\Component.js" />
+                <File name="source\Core\GameObject.js" />
+                <File name="source\Core\Scene.js" />
+                <File name="source\Core\Vector2.js" />
+                <File name="source\Core\Vector3.js" />
+                <File name="source\Core\Vector4.js" />
+            </Folder>
+            <Folder name="Display">
+                <File name="source\Display\StarField.js" />
+            </Folder>
+            <Folder name="experimental">
+                <File name="source\experimental\x.camera.js" />
+                <File name="source\experimental\x.stars.js" />
+            </Folder>
+            <Folder name="libs">
+                <File name="source\libs\easeljs-0.8.2.combined.js" />
+                <File name="source\libs\lodash-4.17.4.js" />
+                <File name="source\libs\modernizr-2.5.3.min.js" />
+                <File name="source\libs\preloadjs-0.6.2.combined.js" />
+                <File name="source\libs\require.js" />
+                <File name="source\libs\underscore.js" />
+            </Folder>
+            <Folder name="mixins">
+                <File name="source\mixins\Events.js" />
+            </Folder>
+            <File name="source\Character.js" />
+            <File name="source\Component.js" />
+            <File name="source\Core.js" />
+            <File name="source\DemoEaselDisplay.js" />
+            <File name="source\DemoGame.js" />
+            <File name="source\DemoMain.js" />
+            <File name="source\DemoModule.js" />
+            <File name="source\DemoScene.js" />
+            <File name="source\EaselDisplay.js" />
+            <File name="source\FlightModule.js" />
+            <File name="source\Game.js" />
+            <File name="source\Keyboard.js" />
+            <File name="source\Main.js" />
+            <File name="source\SetPiece.js" />
+        </Folder>
+        <File name="demoApp.html" />
+        <File name="index.html" />
+        <File name="README.md" />
+        <File name="x.camera.html" />
+        <File name="x.stars.html" />
+    </Project>
+</NotepadPlus>

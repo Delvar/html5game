@@ -22,6 +22,6 @@ require.config({
 
 requirejs(['Game'],
 	function (Game) {
-	game = new Game();
+	game = new Game({}, document.getElementById("canvas"));
 	game.start();
 });

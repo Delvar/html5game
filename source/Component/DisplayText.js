@@ -1,24 +1,18 @@
 define(
 	'Component/DisplayText',
-	['Component', 'easel',
-		'Component/EaselWrap'],
-	function (Component, createjs) {
+	['Component',
+		'Component/DisplayItem'],
+	function (Component) {
 
 	function DisplayText(text, font, color) {
-		Component.EaselWrap.call(this);
-		this.setWrapped(new createjs.Text(text, font, color));
+		Component.DisplayItem.call(this);
+		this.text = text;
+		this.font = font;
+		this.color = color;
 	}
 
-	DisplayText.prototype = Object.create(Component.EaselWrap.prototype);
+	DisplayText.prototype = Object.create(Component.DisplayItem.prototype);
 	DisplayText.prototype.constructor = DisplayText;
-
-	DisplayText.prototype.getTextObject = function () {
-		return this.getWrapped();
-	};
-
-	DisplayText.prototype.setTextObject = function (wrapped) {
-		return this.setWrapped(wrapped);
-	};
 
 	Component.DisplayText = DisplayText;
 	return DisplayText;
