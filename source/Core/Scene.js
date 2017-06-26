@@ -1,9 +1,9 @@
-
 define(
 	'Core/Scene',
 	['Core', 'Component', 'underscore',
 		'Core/GameObject', 'Component/Transform'],
 	function (Core, Component, _) {
+	"use strict";
 	function Scene() {
 		Core.GameObject.call(this, 'Scene');
 	}

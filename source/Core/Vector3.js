@@ -3,6 +3,7 @@ define(
 	['Core',
 		'Core/Vector2'],
 	function (Core) {
+	"use strict";
 	function Vector3(x, y, z) {
 		if (x instanceof Vector3) {
 			Core.Vector2.call(this, x.x, x.y);

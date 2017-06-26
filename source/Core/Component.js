@@ -2,6 +2,7 @@ define(
 	'Core/Component',
 	['Core'],
 	function (Core) {
+	"use strict";
 	function Component() {
 		this.gameObject = undefined;
 	}

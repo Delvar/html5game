@@ -2,6 +2,7 @@ define(
 	'Core/Vector2',
 	['Core'],
 	function (Core) {
+	"use strict";
 	function Vector2(x, y) {
 		if (x instanceof Vector2) {
 			this.x = x.x;

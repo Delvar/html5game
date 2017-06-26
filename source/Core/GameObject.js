@@ -3,6 +3,7 @@ define(
 	['Core', 'Component',
 		'Core/Component', 'Component/Transform', 'Component/Transform'],
 	function (Core, Component) {
+	"use strict";
 	function GameObject(name) {
 		this.name = name;
 		this.components = new Array();

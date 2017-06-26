@@ -1,11 +1,18 @@
 define(
 	'Game',
-	['EaselDisplay', 'FlightModule', 'underscore'],
-	function (EaselDisplay, FlightModule, _) {
+	['EaselDisplay', 'FlightModule', 'underscore', 'Core',
+		'Core/Input'],
+	function (EaselDisplay, FlightModule, _, Core) {
+	"use strict";
 	function Game(options, canvas) {
+		canvas.addEventListener('click', function (event) {
+			window.focus();
+			this.focus();
+		}, false);
 		this.display = new EaselDisplay(canvas);
+		this.input = Core.Input;
 		var defaults = {
-			module: new FlightModule(this.display)
+			module: new FlightModule(this.display, this.input)
 		};
 		this.settings = _.extend(defaults, options);
 	};

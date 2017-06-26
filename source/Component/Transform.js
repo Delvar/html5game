@@ -3,12 +3,13 @@ define(
 	['Core', 'Component',
 		'Core/Component', 'Core/Vector2'],
 	function (Core, Component) {
-
+	"use strict";
 	function Transform() {
 		Core.Component.call(this);
 		this.localPosition = new Core.Vector2(0, 0);
 		this.localRotation = 0;
 		this.localScale = new Core.Vector2(1, 1);
+		this.centerPosition = new Core.Vector2(0, 0);
 
 		this.parent = undefined;
 		this.children = new Array();

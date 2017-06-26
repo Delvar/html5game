@@ -1,31 +1,48 @@
 define(
 	'EaselDisplay',
-	['underscore', 'easel', 'preload', 'Component',
-		'Component/DisplayItem', 'Component/Transform', 'Component/DisplayText'],
+	['underscore', 'easel', 'preload', 'Core', 'Component',
+		'Core/Time', 'Core/SpriteSheet', 'Component/DisplayItem', 'Component/Transform', 'Component/DisplayText', 'Component/DisplayBitmap', 'Component/DisplayBitmapText'],
 
-	function (_, createjs, preload, Component) {
+	function (_, createjs, preload, Core, Component) {
+	"use strict";
 	function EaselDisplay(canvas) {
 		this.canvas = canvas;
 		this.stage = new createjs.Stage(canvas);
 		this.scene = undefined;
 		//used to prefix the name of injected objects
 		this.id = Math.random().toString(36).substring(2, 6).toUpperCase();
+		this.injectPoint = '_EaselDisplay_' + this.id;
+
+		//FIXME: need to decide on how best to set the canvas size.
+		this.stage.canvas.width = window.innerWidth; //canvas.parentElement.clientWidth; //window.innerWidth;
+		this.stage.canvas.height = window.innerHeight; //canvas.parentElement.clientHeight;//window.innerHeight;
 	}
+
+	//hotwire the width and height to the canvas.
+	Object.defineProperty(EaselDisplay.prototype, 'width', {
+		get: function () {
+			return this.stage.canvas.width;
+		}
+	});
+	Object.defineProperty(EaselDisplay.prototype, 'height', {
+		get: function () {
+			return this.stage.canvas.height;
+		}
+	});
 
 	EaselDisplay.prototype.setScene = function (scene) {
 		this.scene = scene;
 	};
 
-	getName = function () {
+	function getName() {
 		var funcNameRegex = /function (.{1,})\(/;
 		var results = (funcNameRegex).exec((this).constructor.toString());
 		return (results && results.length > 1) ? results[1] : "";
 	};
 
 	EaselDisplay.prototype.prepareScene = function () {
-		//loop though all gameObjects>Component and inject Containers and easel graphics
-		var id = '_EaselDisplay_' + this.id;
-
+		//alias the injectionPoint for use in the below functiuon.
+		var ip = this.injectPoint;
 		//here we inject easle into everything we care about and hookup the hierarchy
 		this.scene.recursiveCallbackOnComponents(function () {
 			//console.log("EaselDisplay:prepareScene", this);
@@ -33,72 +50,111 @@ define(
 
 			if (this instanceof Component.Transform) {
 				t.display = new createjs.Container();
-				t.display.x = this.gameObject.transform.localPosition.x;
-				t.display.y = this.gameObject.transform.localPosition.y;
-				t.display.rotation = this.gameObject.transform.localRotation;
 			} else if (this instanceof Component.DisplayBitmap) {
 				t.display = new createjs.Bitmap(this.imageUri); //FIXME: setup preload
+				this.image = t.display.image;
 			} else if (this instanceof Component.DisplayText) {
-				t.display = new createjs.Text(this.text, this.font, this.color);
-				t.display.textBaseline = "alphabetic";
+				t.display = new createjs.Text();
+				//t.display.textBaseline = "alphabetic";
+			} else if (this instanceof Component.DisplayBitmapText) {
+				//inject into the sprite sheet
+				//FIXME: check that we have not already injected this...
+				var ss = this.spriteSheet;
+				var data = {
+					images: ss.imageUris,
+					frames: ss.frames,
+					animations: ss.animations
+				};
+				var sso = new createjs.SpriteSheet(data);
+				ss[ip] = {
+					display: sso
+				};
+				t.display = new createjs.BitmapText(this.text, sso);
 			} else {
 				console.error("Unknown type", this);
 				return;
 			}
 
 			if (!(this instanceof Component.Transform)) {
-				this.gameObject.transform[id].display.addChild(t.display);
+				this.gameObject.transform[ip].display.addChild(t.display);
 			} else if (this.gameObject.transform.parent != undefined) {
-				this.gameObject.transform.parent[id].display.addChild(t.display);
+				this.gameObject.transform.parent[ip].display.addChild(t.display);
 			}
 
-			this[id] = t;
+			this[ip] = t;
 		});
+		this.stage.addChild(this.scene.transform[ip].display);
 
-		this.stage.addChild(this.scene.transform[id].display);
+		//now go though and populate the object values.. could do thi sat the same time but didnt want to duplicate teh setting.
+		this.updateScene();
 	};
 
 	EaselDisplay.prototype.updateScene = function () {
-		//loop though all gameObjects>Component and UPDATE Containers and easel graphics
-		var id = '_EaselDisplay_' + this.id;
-
+		//alias the injectionPoint for use in the below functiuon.
+		var ip = this.injectPoint;
 		//here we inject easle into everything we care about and hookup the hierarchy
 		this.scene.recursiveCallbackOnComponents(function () {
 			//console.log("EaselDisplay:updateScene", this);
-			var t = this[id];
+			var t = this[ip];
 
 			if (t == undefined) {
 				return;
 			}
 
+			//FIXME: check if these are dirty first!
 			if (this instanceof Component.Transform) {
 				t.display.x = this.gameObject.transform.localPosition.x;
 				t.display.y = this.gameObject.transform.localPosition.y;
 				t.display.rotation = this.gameObject.transform.localRotation;
+				t.display.scaleX = this.gameObject.transform.localScale.x;
+				t.display.scaleY = this.gameObject.transform.localScale.y;
 			} else if (this instanceof Component.DisplayBitmap) {
 				//FIXME: update image URI ?!!
+				if (this.autoCenter && t.display.isVisible()) {
+					this.centerPosition.x = t.display.image.width / 2;
+					this.centerPosition.y = t.display.image.height / 2;
+					this.autoCenter = false;
+				}
 			} else if (this instanceof Component.DisplayText) {
 				t.display.text = this.text;
 				t.display.font = this.font;
 				t.display.color = this.color;
+			} else if (this instanceof Component.DisplayBitmapText) {
+				t.display.text = this.text;
 			} else {
 				console.error("Unknown type", this);
 				return;
 			}
+			t.display.regX = this.centerPosition.x;
+			t.display.regY = this.centerPosition.y;
 		});
 
-		this.stage.addChild(this.scene.transform[id].display);
+		this.stage.addChild(this.scene.transform[ip].display);
 	};
 
 	EaselDisplay.prototype.startScene = function () {
 		var display = this;
-		createjs.Ticker.setFPS(30);
-		createjs.Ticker.addEventListener("tick", function () {
-			//updateSprites(This.sprites, This.getCurrentScene());
+		createjs.Ticker.setFPS(60);
+		createjs.Ticker.addEventListener("tick", function (event) {
+
+			//FIXME: need a better way to do this
+			//patch in the frame rate stuff...
+			Core.Time.delta = event.delta;
+			Core.Time.paused = event.paused;
+			Core.Time.time = event.time;
+			Core.Time.runTime = event.runTime;
+			Core.Time.deltaSeconds = event.delta / 1000;
+
 			display.scene.Update();
 			display.updateScene();
 			display.stage.update();
 		});
+	};
+
+	EaselDisplay.prototype.runScene = function (scene) {
+		this.scene = scene;
+		this.prepareScene();
+		this.startScene();
 	};
 
 	/*

@@ -3,7 +3,7 @@ define(
 	['Component',
 		'Component/DisplayItem'],
 	function (Component) {
-
+	"use strict";
 	function DisplayText(text, font, color) {
 		Component.DisplayItem.call(this);
 		this.text = text;
