@@ -1,7 +1,7 @@
 define(
 	'FlightModule',
 	['underscore', 'Core', 'Component',
-		'Core/Vector2', 'Core/Vector3', 'Core/Vector4', 'Core/GameObject', 'Core/Scene', 'Core/Time', 'Core/SpriteSheet', 'Component/Camera', 'Component/DisplayBitmap', 'Component/DisplayText'],
+		'Core/Vector2', 'Core/Vector3', 'Core/Vector4', 'Core/GameObject', 'Core/Scene', 'Core/Time', 'Core/SpriteSheet', 'Core/Input', 'Component/Camera', 'Component/DisplayBitmap', 'Component/DisplayText'],
 	function (_, Core, Component) {
 	"use strict";
 	function FlightModule(display) {
@@ -20,28 +20,45 @@ define(
 		var camera = new Component.Camera();
 
 		var go1 = new Core.GameObject('go1');
-		go1.transform.localPosition = new Core.Vector2(200, 200);
+		go1.transform.localPosition.set(200, 200);
 		go1.addComponent(camera);
 		go1.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
 		go1.transform.setParent(world.transform);
 
 		go1.transform.Update = function () {
 			Component.Transform.prototype.Update.call(this);
-			this.localRotation += Core.Time.deltaSeconds * 45;
+			if (Core.Input.isDown("W".charCodeAt(0)) || Core.Input.isDown(38)) {
+				this.localPosition.add(this.forward.multiply(Core.Time.deltaSeconds * 120));
+			}
+			if (Core.Input.isDown("S".charCodeAt(0)) || Core.Input.isDown(40)) {
+				this.localPosition.add(this.forward.multiply(Core.Time.deltaSeconds * -60));
+			}
+			if (Core.Input.isDown("A".charCodeAt(0))) {
+				this.localPosition.add(this.right.multiply(Core.Time.deltaSeconds * -60));
+			}
+			if (Core.Input.isDown("D".charCodeAt(0))) {
+				this.localPosition.add(this.right.multiply(Core.Time.deltaSeconds * 60));
+			}
+			if (Core.Input.isDown(37)) {
+				this.localRotation -= Core.Time.deltaSeconds * 60;
+			}
+			if (Core.Input.isDown(39)) {
+				this.localRotation += Core.Time.deltaSeconds * 60;
+			}
 		}
 
 		var go2 = new Core.GameObject('go2');
 		go2.transform.localPosition = new Core.Vector2(100, 100);
 		go2.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
-		go2.transform.setParent(go1.transform);
+		go2.transform.setParent(world.transform);
 
 		go2.transform.Update = function () {
 			Component.Transform.prototype.Update.call(this);
-			this.localRotation += Core.Time.deltaSeconds * -90;
+			//this.localRotation += Core.Time.deltaSeconds * -90;
 		}
 
 		var fps = new Core.GameObject('fps');
-		fps.transform.localPosition = new Core.Vector2(20, 20);
+		fps.transform.localPosition.set(20, 20);
 		var displayText = new Component.DisplayText("-", "20px 'Press Start 2P', cursive", "#ff7700");
 		fps.addComponent(displayText);
 		fps.transform.setParent(gui.transform);
@@ -50,6 +67,16 @@ define(
 			displayText.text = Core.Time.getMeasuredFPS().toFixed(2);
 		}
 
+		var titleGo = new Core.GameObject('Title');
+		titleGo.transform.localPosition.set(20, 400);
+		titleGo.addComponent(new Component.DisplayBitmapText("SPACE FLIGHT MODULE TEST", setupDisplayBitmapTextSpriteSheet()));
+		titleGo.transform.setParent(gui.transform);
+
+		scene.Awake();
+		this.display.runScene(scene);
+	};
+
+	function setupDisplayBitmapTextSpriteSheet() {
 		var data = {
 			"imageUris": ["images/Vikramarka/komika_new.png"],
 			"frames": [
@@ -180,18 +207,8 @@ define(
 
 		data.animations = a;
 
-		var titleGo = new Core.GameObject('Title');
-		titleGo.transform.localPosition = new Core.Vector2(20, 400);
-		var titleSpriteSheet = new Core.SpriteSheet(data);
-		var titleBitmapText = new Component.DisplayBitmapText("SPACE FLIGHT MODULE TEST", titleSpriteSheet);
-
-		titleGo.addComponent(titleBitmapText);
-		titleGo.transform.setParent(gui.transform);
-
-		scene.Awake();
-		this.display.runScene(scene);
-
-	};
+		return new Core.SpriteSheet(data);
+	}
 
 	return FlightModule;
 });

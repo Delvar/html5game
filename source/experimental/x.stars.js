@@ -5,15 +5,10 @@ var starFieldLayers = [];
 var starField = [];
 var starFieldOuterBand = 20;
 
-
-
-
-
 function init() {
 	stage = new createjs.Stage("testCanvas");
 	resize();
-	
-	
+
 	manifest = [{
 			src: "smallfighter0006.png",
 			id: "smallfighter"
@@ -111,9 +106,7 @@ function rgbToHsl(r, g, b) {
 	return [h, s, l];
 }
 
-function setupStarField() {
-	
-}
+function setupStarField() {}
 
 function handleComplete() {
 	var i,
@@ -196,20 +189,21 @@ function handleComplete() {
 	stage.addChild(smallfighter);
 
 	fpsText = new createjs.Text("-", "20px Arial", "#ff7700");
-	fpsText.x = 10; fpsText.y = 20;
+	fpsText.x = 10;
+	fpsText.y = 20;
 	fpsText.textBaseline = "alphabetic";
 	stage.addChild(fpsText);
-	
+
 	//createjs.Ticker.setFPS(30);
 	createjs.Ticker.timingMode = createjs.Ticker.RAF;
 	createjs.Ticker.addEventListener("tick", tick);
 }
 
 function tick(event) {
-	
+
 	fpsText.text = (createjs.Ticker.getMeasuredFPS()).toFixed(2);
-	
-	smallfighter.rotation = (smallfighter.rotation + Math.sin(event.runTime/5000) )%360;
+
+	smallfighter.rotation = (smallfighter.rotation + Math.sin(event.runTime / 5000)) % 360;
 	//smallfighter.scaleX = smallfighter.scaleY = 0.2 + ((Math.sin(smallfighter.rotation / 100) + 1) * 0.4);
 
 	var i,
@@ -259,8 +253,8 @@ function tick(event) {
 		star.y = y;
 	}
 
-	var speed = 10+((Math.sin(event.runTime/7000)+1)*0.5*30);
-	speed = (speed/50) * event.delta;
+	var speed = 10 + ((Math.sin(event.runTime / 7000) + 1) * 0.5 * 30);
+	speed = (speed / 50) * event.delta;
 	var a = (90 + smallfighter.rotation) * Math.PI / 180;
 	var dx = (speed * Math.cos(a));
 	var dy = (speed * Math.sin(a));

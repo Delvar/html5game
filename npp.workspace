@@ -60,7 +60,6 @@
                     <File name="source\config\scripts\CharacterController.js" />
                     <File name="source\config\scripts\DoorOpener.js" />
                 </Folder>
-                <File name="source\config\.DS_Store" />
             </Folder>
             <Folder name="Core">
                 <File name="source\Core\Component.js" />
@@ -70,6 +69,10 @@
                 <File name="source\Core\Vector2.js" />
                 <File name="source\Core\Vector3.js" />
                 <File name="source\Core\Vector4.js" />
+                <File name="source\Core\SpriteSheet.js" />
+                <File name="source\Core\Input.js" />
+                <File name="source\Core\Matrix3x3.js" />
+                <File name="source\Core\TransformProperties.js" />
             </Folder>
             <Folder name="Display">
                 <File name="source\Display\StarField.js" />

@@ -1,7 +1,7 @@
 define(
 	'Component/Transform',
 	['Core', 'Component',
-		'Core/Component', 'Core/Vector2'],
+		'Core/Component', 'Core/Vector2', 'Core/TransformProperties', 'Core/Matrix3x3'],
 	function (Core, Component) {
 	"use strict";
 	function Transform() {
@@ -10,7 +10,7 @@ define(
 		this.localRotation = 0;
 		this.localScale = new Core.Vector2(1, 1);
 		this.centerPosition = new Core.Vector2(0, 0);
-
+		this._props = new Core.TransformProperties();
 		this.parent = undefined;
 		this.children = new Array();
 	}
@@ -70,40 +70,28 @@ define(
 		}
 		return this;
 	};
-	/*
-	Transform.prototype.getContainerObject = function () {
-	return this.containerObject;
-	};
 
-	Transform.prototype.setContainerObject = function (containerObject) {
-	this.containerObject = containerObject;
-	return this;
-	};
+	//Transform.prototype.forward
 
-	Transform.prototype.Awake = function () {
-	Core.Component.prototype.Awake.call(this);
-	var that = this;
-	//FIXME: needs to be moved out to cammera functions for world to screen space/scale conversion.
-	this.containerObject.x = this.localPosition.x;
-	this.containerObject.y = this.localPosition.y;
-	_.each(this.gameObject.getComponentsByType(Component.EaselWrap), function (easelWrap) {
-	if (!(easelWrap instanceof Component.Transform)) {
-	that.containerObject.addChild(easelWrap.getWrapped());
-	}
+	//the forward direction of this transform,
+	Object.defineProperty(Transform.prototype, 'forward', {
+		get: function () {
+			var sin = Math.sin(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
+			var cos = Math.cos(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
+			return new Core.Vector2(sin, -cos);
+			//return new Core.Vector2((cos * tx + sin * ty),(sin * tx - cos * ty));
+		}
 	});
-	//for each child game game object we go and get the containers and append to our container.
-	_.each(this.children, function (child) {
-	that.containerObject.addChild(child.getContainerObject());
-	});
-	};
 
-	Transform.prototype.Update = function () {
-	Core.Component.prototype.Update.call(this);
-	this.containerObject.x = this.localPosition.x;
-	this.containerObject.y = this.localPosition.y;
-	this.containerObject.rotation = this.localRotation;
-	}
-	 */
+	Object.defineProperty(Transform.prototype, 'right', {
+		get: function () {
+			var sin = Math.sin(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
+			var cos = Math.cos(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
+			return new Core.Vector2(cos, sin);
+			//return new Core.Vector2((cos * tx + sin * ty),(sin * tx - cos * ty));
+		}
+	});
+
 	Component.Transform = Transform;
 	return Transform;
 });
