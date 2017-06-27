@@ -9,11 +9,11 @@ define(
 
 	Vector2.prototype.set = function (x, y) {
 		if (x instanceof Vector2) {
-			this.x = x.x;
-			this.y = x.y;
+			this.x = x.x||0;
+			this.y = x.y||0;
 		} else {
-			this.x = x;
-			this.y = y;
+			this.x = x||0;
+			this.y = y||0;
 		}
 		return this;
 	};

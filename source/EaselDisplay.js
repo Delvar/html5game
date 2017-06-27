@@ -40,12 +40,14 @@ define(
 		return (results && results.length > 1) ? results[1] : "";
 	};
 
-	EaselDisplay.prototype.prepareScene = function () {
+	//FIXME: split these switches and use an array of types, then I simply call the 
+	// function directly via the array, i can then do the inject and update in one round.
+	EaselDisplay.prototype.setupInjections = function () {
 		//alias the injectionPoint for use in the below functiuon.
 		var ip = this.injectPoint;
 		//here we inject easle into everything we care about and hookup the hierarchy
 		this.scene.recursiveCallbackOnComponents(function () {
-			//console.log("EaselDisplay:prepareScene", this);
+			//console.log("EaselDisplay:setupInjections", this);
 			var t = {};
 
 			if (this instanceof Component.Transform) {
@@ -86,15 +88,15 @@ define(
 		this.stage.addChild(this.scene.transform[ip].display);
 
 		//now go though and populate the object values.. could do thi sat the same time but didnt want to duplicate teh setting.
-		this.updateScene();
+		this.updateInjections();
 	};
 
-	EaselDisplay.prototype.updateScene = function () {
+	EaselDisplay.prototype.updateInjections = function () {
 		//alias the injectionPoint for use in the below functiuon.
 		var ip = this.injectPoint;
 		//here we inject easle into everything we care about and hookup the hierarchy
 		this.scene.recursiveCallbackOnComponents(function () {
-			//console.log("EaselDisplay:updateScene", this);
+			//console.log("EaselDisplay:updateInjections", this);
 			var t = this[ip];
 
 			if (t == undefined) {
@@ -134,7 +136,9 @@ define(
 
 	EaselDisplay.prototype.startScene = function () {
 		var display = this;
-		createjs.Ticker.setFPS(60);
+		createjs.Ticker.setFPS(15);
+//createjs.Ticker.setFPS(1);
+		//FIXME: move the scene updating out of here
 		createjs.Ticker.addEventListener("tick", function (event) {
 
 			//FIXME: need a better way to do this
@@ -146,14 +150,14 @@ define(
 			Core.Time.deltaSeconds = event.delta / 1000;
 
 			display.scene.Update();
-			display.updateScene();
+			display.updateInjections();
 			display.stage.update();
 		});
 	};
 
 	EaselDisplay.prototype.runScene = function (scene) {
 		this.scene = scene;
-		this.prepareScene();
+		this.setupInjections();
 		this.startScene();
 	};
 

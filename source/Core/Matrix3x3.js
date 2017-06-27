@@ -16,7 +16,7 @@ define(
 		if (a instanceof Array) {
 			this.setValuesArray(a);
 		} else { //if (a != undefined && b != undefined && c != undefined && d != undefined && e != undefined && f != undefined && g != undefined && h != undefined && i != undefined) {
-			this.setValuesArray([a, b, c, d, e, f, g, h, i]);
+			this.setValuesArray([a, c, e, b, d, f, g, h, i]);
 		}
 	}
 
@@ -39,7 +39,7 @@ define(
 	}
 
 	Matrix3x3.prototype.setValues = function (a, b, c, d, e, f, g, h, i) {
-		this.setValuesArray([a, b, c, d, e, f, g, h, i]);
+		this.setValuesArray([a, c, e, b, d, f, g, h, i]);
 		return this;
 	};
 
@@ -79,7 +79,7 @@ define(
 	};
 
 	Matrix3x3.prototype.append = function (a, b, c, d, e, f, g, h, i) {
-		this.appendArray([a, b, c, d, e, f, g, h, i]);
+		this.appendArray([a, c, e, b, d, f, g, h, i]);
 	}
 
 	Matrix3x3.prototype.appendMatrix = function (matrix) {
@@ -87,6 +87,8 @@ define(
 	};
 
 	Matrix3x3.prototype.appendTransform = function (x, y, scaleX, scaleY, rotation, regX, regY) {
+		//console.log("AppendTransform", x, y, scaleX, scaleY, rotation, regX, regY);
+
 		var r = rotation * Core.Matrix3x3.DEG_TO_RAD;
 		var cos = Math.cos(r);
 		var sin = Math.sin(r);
@@ -116,6 +118,7 @@ define(
 		//t[3] = v[3];	//t[4] = v[4]; //t[5] = v[5];
 		//t[6] = v[6];	//t[7] = v[7]; //t[8] = v[8];
 
+		//console.log('v', v, 't', t, 'u', u);
 		//this.a  = a*a1+c*this.b;
 		v[0] = u[0] * t[0] + u[1] * v[3];
 		//this.b  = b*a1+d*this.b;
@@ -129,11 +132,12 @@ define(
 		//this.ty = b*tx1+d*this.ty+ty;
 		v[5] = u[3] * t[2] + u[4] * v[5] + u[5];
 
+		this.v = v;
 		return this;
 	};
 
 	Matrix3x3.prototype.prepend = function (a, b, c, d, e, f, g, h, i) {
-		this.prependArray([a, b, c, d, e, f, g, h, i]);
+		this.prependArray([a, c, e, b, d, f, g, h, i]);
 	}
 
 	Matrix3x3.prototype.prependMatrix = function (matrix) {
@@ -151,6 +155,7 @@ define(
 			this.v[2] -= regX;
 			this.v[5] -= regY;
 		}
+
 		this.prepend(cos * scaleX, sin * scaleX, -sin * scaleY, cos * scaleY, x, y);
 		return this;
 	};
@@ -262,6 +267,12 @@ define(
 		target.y = this.v[5];
 		target.scaleX = Math.sqrt(this.v[0] * this.v[0] + this.v[3] * this.v[3]);
 		target.scaleY = Math.sqrt(this.v[1] * this.v[1] + this.v[4] * this.v[4]);
+		var atan = Math.atan2(this.v[3], this.v[0]);
+		target.rotation = atan / Core.Matrix3x3.DEG_TO_RAD;
+		if (this.v[0] < 0 && this.v[4] >= 0) {
+			target.rotation += (target.rotation <= 0) ? 180 : -180;
+		}
+
 		return target;
 	};
 

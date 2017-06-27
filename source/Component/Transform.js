@@ -1,7 +1,7 @@
 define(
 	'Component/Transform',
 	['Core', 'Component',
-		'Core/Component', 'Core/Vector2', 'Core/TransformProperties', 'Core/Matrix3x3'],
+		'Core/Component', 'Core/Vector2', 'Core/Matrix3x3'],
 	function (Core, Component) {
 	"use strict";
 	function Transform() {
@@ -10,9 +10,9 @@ define(
 		this.localRotation = 0;
 		this.localScale = new Core.Vector2(1, 1);
 		this.centerPosition = new Core.Vector2(0, 0);
-		this._props = new Core.TransformProperties();
 		this.parent = undefined;
 		this.children = new Array();
+		this.transformMatrix = false;
 	}
 
 	Transform.prototype = Object.create(Core.Component.prototype);
@@ -91,6 +91,46 @@ define(
 			//return new Core.Vector2((cos * tx + sin * ty),(sin * tx - cos * ty));
 		}
 	});
+
+	Transform.prototype.getMatrix = function(matrix) {
+		if (matrix == undefined) {
+			matrix = new Core.Matrix3x3();
+		}
+		if (this.transformMatrix) {
+			matrix.copy(this.transformMatrix);
+		} else {
+			matrix.identity();
+		}
+		
+		matrix.appendTransform(this.localPosition.x, this.localPosition.y, this.localScale.x, this.localScale.y, this.localRotation, this.centerPosition.x, this.centerPosition.y);
+		//console.log('getMatrix',this.gameObject,matrix.v);
+		return matrix;
+	};
+
+	//FIXME: cache teh matrix of parents so we dont recalculate then every time
+	Transform.prototype.getConcatenatedMatrix = function(matrix) {
+		if (matrix == undefined) {
+			matrix = new Core.Matrix3x3();
+		}
+		var o = this;
+		//var m = new Core.Matrix3x3();
+		this.getMatrix(matrix);
+		//console.log('getConcatenatedMatrix:while',o.gameObject,matrix.v,matrix.decompose())
+		while (o = o.parent) {
+			matrix.prependMatrix(o.getMatrix(new Core.Matrix3x3()));
+			//console.log('getConcatenatedMatrix:while',o.gameObject,matrix.v,matrix.decompose());
+		}
+		//console.log('getConcatenatedMatrix',matrix.v)
+		return matrix;
+	};
+
+	Transform.prototype.localToGlobal = function(x, y, pt) {
+		return this.getConcatenatedMatrix(new Core.Matrix3x3()).transformPoint(x,y, pt||new Core.Vector2());
+	};
+
+	Transform.prototype.globalToLocal = function(x, y, pt) {
+		return this.getConcatenatedMatrix(new Core.Matrix3x3()).invert().transformPoint(x,y, pt||new Core.Vector2());
+	};
 
 	Component.Transform = Transform;
 	return Transform;

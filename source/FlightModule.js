@@ -48,9 +48,10 @@ define(
 		}
 
 		var go2 = new Core.GameObject('go2');
-		go2.transform.localPosition = new Core.Vector2(100, 100);
+		go2.transform.localPosition.set(101, 102);
+		//go2.transform.localScale.set(1.1, 1.2);
 		go2.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
-		go2.transform.setParent(world.transform);
+		go2.transform.setParent(go1.transform);
 
 		go2.transform.Update = function () {
 			Component.Transform.prototype.Update.call(this);
@@ -59,18 +60,32 @@ define(
 
 		var fps = new Core.GameObject('fps');
 		fps.transform.localPosition.set(20, 20);
-		var displayText = new Component.DisplayText("-", "20px 'Press Start 2P', cursive", "#ff7700");
-		fps.addComponent(displayText);
+		var fpsDisplayText = new Component.DisplayText("-", "20px 'Press Start 2P', cursive", "#ff7700");
+		fps.addComponent(fpsDisplayText);
 		fps.transform.setParent(gui.transform);
 
-		displayText.Update = function () {
-			displayText.text = Core.Time.getMeasuredFPS().toFixed(2);
+		fpsDisplayText.Update = function () {
+			this.text = Core.Time.getMeasuredFPS().toFixed(2);
 		}
 
 		var titleGo = new Core.GameObject('Title');
 		titleGo.transform.localPosition.set(20, 400);
 		titleGo.addComponent(new Component.DisplayBitmapText("SPACE FLIGHT MODULE TEST", setupDisplayBitmapTextSpriteSheet()));
 		titleGo.transform.setParent(gui.transform);
+
+		var debug = new Core.GameObject('Debug');
+		var debugDisplayText = new Component.DisplayText("-", "8px 'Press Start 2P', cursive", "#ff00ff");
+		debug.addComponent(debugDisplayText);
+		debug.transform.setParent(gui.transform);
+
+		debugDisplayText.Update = function () {
+			var g1p = go1.transform.localToGlobal(0,0);
+			var g2p = go2.transform.localToGlobal(0,0);
+			//console.log(g2p);
+			this.gameObject.transform.localPosition.set(g2p);
+			this.text = "x: " + g1p.x.toFixed(2) + " y: " + g1p.y.toFixed(2) +"\nx: " + g2p.x.toFixed(2) + " y: " + g2p.y.toFixed(2);
+		//debugger;
+		}
 
 		scene.Awake();
 		this.display.runScene(scene);
