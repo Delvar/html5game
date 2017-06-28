@@ -87,8 +87,6 @@ define(
 	};
 
 	Matrix3x3.prototype.appendTransform = function (x, y, scaleX, scaleY, rotation, regX, regY) {
-		//console.log("AppendTransform", x, y, scaleX, scaleY, rotation, regX, regY);
-
 		var r = rotation * Core.Matrix3x3.DEG_TO_RAD;
 		var cos = Math.cos(r);
 		var sin = Math.sin(r);
@@ -118,7 +116,6 @@ define(
 		//t[3] = v[3];	//t[4] = v[4]; //t[5] = v[5];
 		//t[6] = v[6];	//t[7] = v[7]; //t[8] = v[8];
 
-		//console.log('v', v, 't', t, 'u', u);
 		//this.a  = a*a1+c*this.b;
 		v[0] = u[0] * t[0] + u[1] * v[3];
 		//this.b  = b*a1+d*this.b;

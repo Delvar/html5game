@@ -6,7 +6,16 @@ define(
 	function Vector2(x, y) {
 		this.set(x, y);
 	};
-
+/*
+	Object.defineProperties(Vector2.prototype, {
+		'x':{get: function() { return this._x; },
+			set: function(x) { this._x = x; this._ts = Date.now();},
+			enumerable: true},
+		'y':{get: function() { return this._y; },
+			set: function(y) { this._y = y; this._ts = Date.now();},
+			enumerable: true},
+	});
+*/
 	Vector2.prototype.set = function (x, y) {
 		if (x instanceof Vector2) {
 			this.x = x.x||0;

@@ -33,6 +33,7 @@
                 <File name="source\Component\DisplayText.js" />
                 <File name="source\Component\Transform.js" />
                 <File name="source\Component\DisplayBitmapText.js" />
+                <File name="source\Component\DisplaySprite.js" />
             </Folder>
             <Folder name="Core">
                 <File name="source\Core\Component.js" />

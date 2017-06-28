@@ -9,11 +9,19 @@ define(
 		this.localPosition = new Core.Vector2(0, 0);
 		this.localRotation = 0;
 		this.localScale = new Core.Vector2(1, 1);
+		/*
+		this.worldPosition = new Core.Vector2(0, 0);
+		this.worldRotation = 0;
+		this.worldScale = new Core.Vector2(1, 1);
+
+		this.cameraPosition = new Core.Vector2(0, 0);
+		this.cameraRotation = 0;
+		this.cameraScale = new Core.Vector2(1, 1);
+		 */
 		this.centerPosition = new Core.Vector2(0, 0);
 		this.parent = undefined;
 		this.children = new Array();
-		this.transformMatrix = false;
-	}
+	};
 
 	Transform.prototype = Object.create(Core.Component.prototype);
 	Transform.prototype.constructor = Transform;
@@ -71,65 +79,56 @@ define(
 		return this;
 	};
 
-	//Transform.prototype.forward
+	Transform.prototype.getForward = function () {
+		var r = this.localRotation * Core.Matrix3x3.DEG_TO_RAD;
+		return new Core.Vector2(Math.sin(r),  - (Math.cos(r)));
+	};
 
-	//the forward direction of this transform,
 	Object.defineProperty(Transform.prototype, 'forward', {
 		get: function () {
-			var sin = Math.sin(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
-			var cos = Math.cos(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
-			return new Core.Vector2(sin, -cos);
-			//return new Core.Vector2((cos * tx + sin * ty),(sin * tx - cos * ty));
+			return this.getForward();
 		}
 	});
+
+	Transform.prototype.getRight = function () {
+		var r = this.localRotation * Core.Matrix3x3.DEG_TO_RAD;
+		return new Core.Vector2(Math.cos(r), Math.sin(r));
+	};
 
 	Object.defineProperty(Transform.prototype, 'right', {
 		get: function () {
-			var sin = Math.sin(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
-			var cos = Math.cos(this.localRotation * Core.Matrix3x3.DEG_TO_RAD);
-			return new Core.Vector2(cos, sin);
-			//return new Core.Vector2((cos * tx + sin * ty),(sin * tx - cos * ty));
+			return this.getRight();
 		}
 	});
 
-	Transform.prototype.getMatrix = function(matrix) {
+	Transform.prototype.getMatrix = function (matrix) {
 		if (matrix == undefined) {
 			matrix = new Core.Matrix3x3();
 		}
-		if (this.transformMatrix) {
-			matrix.copy(this.transformMatrix);
-		} else {
-			matrix.identity();
-		}
-		
+		matrix.identity();
 		matrix.appendTransform(this.localPosition.x, this.localPosition.y, this.localScale.x, this.localScale.y, this.localRotation, this.centerPosition.x, this.centerPosition.y);
-		//console.log('getMatrix',this.gameObject,matrix.v);
 		return matrix;
 	};
 
-	//FIXME: cache teh matrix of parents so we dont recalculate then every time
-	Transform.prototype.getConcatenatedMatrix = function(matrix) {
+	//FIXME: cache the matrix of parents so we dont recalculate them every time
+	Transform.prototype.getConcatenatedMatrix = function (matrix) {
 		if (matrix == undefined) {
 			matrix = new Core.Matrix3x3();
 		}
 		var o = this;
-		//var m = new Core.Matrix3x3();
 		this.getMatrix(matrix);
-		//console.log('getConcatenatedMatrix:while',o.gameObject,matrix.v,matrix.decompose())
 		while (o = o.parent) {
 			matrix.prependMatrix(o.getMatrix(new Core.Matrix3x3()));
-			//console.log('getConcatenatedMatrix:while',o.gameObject,matrix.v,matrix.decompose());
 		}
-		//console.log('getConcatenatedMatrix',matrix.v)
 		return matrix;
 	};
 
-	Transform.prototype.localToGlobal = function(x, y, pt) {
-		return this.getConcatenatedMatrix(new Core.Matrix3x3()).transformPoint(x,y, pt||new Core.Vector2());
+	Transform.prototype.localToGlobal = function (x, y, pt) {
+		return this.getConcatenatedMatrix(new Core.Matrix3x3()).transformPoint(x, y, pt || new Core.Vector2());
 	};
 
-	Transform.prototype.globalToLocal = function(x, y, pt) {
-		return this.getConcatenatedMatrix(new Core.Matrix3x3()).invert().transformPoint(x,y, pt||new Core.Vector2());
+	Transform.prototype.globalToLocal = function (x, y, pt) {
+		return this.getConcatenatedMatrix(new Core.Matrix3x3()).invert().transformPoint(x, y, pt || new Core.Vector2());
 	};
 
 	Component.Transform = Transform;

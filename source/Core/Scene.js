@@ -6,11 +6,22 @@ define(
 	"use strict";
 	function Scene() {
 		Core.GameObject.call(this, 'Scene');
+		this.camera = undefined;
 	}
 
 	Scene.prototype = Object.create(Core.GameObject.prototype);
 	Scene.prototype.constructor = Scene;
 
+	Scene.prototype.setCamera = function (camera) {
+		//FIXME: check that camera is a camera component
+		this.camera = camera;
+		return this;
+	};
+
+	Scene.prototype.getCamera = function () {
+		return this.camera;
+	};
+	
 	Scene.prototype.recursiveCallbackOnComponents = function (func) {
 		var gameObjectQueue = new Array();
 		gameObjectQueue.push(this)

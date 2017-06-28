@@ -1,8 +1,9 @@
 define(
 	'FlightModule',
-	['underscore', 'Core', 'Component',
-		'Core/Vector2', 'Core/Vector3', 'Core/Vector4', 'Core/GameObject', 'Core/Scene', 'Core/Time', 'Core/SpriteSheet', 'Core/Input', 'Component/Camera', 'Component/DisplayBitmap', 'Component/DisplayText'],
-	function (_, Core, Component) {
+	['underscore', 'easel', 'Core', 'Component',
+		'Core/Vector2', 'Core/Vector3', 'Core/Vector4', 'Core/GameObject', 'Core/Scene', 'Core/Time', 'Core/SpriteSheet', 'Core/Input', 'Component/DisplaySprite',
+		'Component/Camera', 'Component/DisplayBitmap', 'Component/DisplayText'],
+	function (_, createjs, Core, Component) {
 	"use strict";
 	function FlightModule(display) {
 		this.display = display;
@@ -14,14 +15,41 @@ define(
 		var world = new Core.GameObject("World");
 		world.transform.setParent(scene.transform);
 
+		var starsGo = new Core.GameObject("Stars");
+		starsGo.transform.setParent(world.transform);
+
+		var data = {
+			"imageUris": ["images/Stars/stars001.png"],
+			frames: {
+				width: 128,
+				height: 128,
+				count: 16,
+				regX: 64,
+				regY: 64,
+				spacing: 0,
+				margin: 0
+			}
+		}
+		var starsSpriteSheet = new Core.SpriteSheet(data);
+		var starsDisplaySprite;
+
+		for (var i = 0; i < 1000; i++) {
+			var frame = Math.floor((1 - Math.pow(Math.random(), 4)) * 16);
+			starsDisplaySprite = new Component.DisplaySprite(starsSpriteSheet, frame);
+			starsDisplaySprite.paused = true;
+			starsDisplaySprite.offset.set(((Math.random() - 0.5) * 5000), ((Math.random() - 0.5) * 5000));
+			starsDisplaySprite.rotation = Math.random() * 360;
+			var scale = (0.3 + (Math.random() * 0.7)) * 0.5;
+			starsDisplaySprite.scale.set(scale, scale);
+			starsGo.addComponent(starsDisplaySprite);
+		}
+
 		var gui = new Core.GameObject("GUI");
 		gui.transform.setParent(scene.transform);
 
-		var camera = new Component.Camera();
-
 		var go1 = new Core.GameObject('go1');
 		go1.transform.localPosition.set(200, 200);
-		go1.addComponent(camera);
+
 		go1.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
 		go1.transform.setParent(world.transform);
 
@@ -47,11 +75,29 @@ define(
 			}
 		}
 
+		var cameraGo = new Core.GameObject('camera');
+		var cameraCom = new Component.Camera();
+		cameraGo.addComponent(cameraCom);
+		cameraGo.transform.setParent(go1.transform);
+		cameraCom.setTarget(world.transform);
+		scene.setCamera(cameraGo);
+
+		cameraCom.Update = function () {
+			Component.Transform.prototype.Update.call(this);
+			Core.Input._mouse.deltaY
+			this.zoomLevel -= (Core.Input._mouse.deltaY / (1000 / this.zoomLevel));
+			this.zoomLevel = Math.min(Math.max(this.zoomLevelMin, this.zoomLevel), this.zoomLevelMax);
+
+			this.displaceTarget = Core.Input.isPressed("E".charCodeAt(0)) ? (!(this.displaceTarget)) : this.displaceTarget;
+			this.rotateTarget = Core.Input.isPressed("R".charCodeAt(0)) ? (!(this.rotateTarget)) : this.rotateTarget;
+			this.scaleTarget = Core.Input.isPressed("T".charCodeAt(0)) ? (!(this.scaleTarget)) : this.scaleTarget;
+
+		}
+
 		var go2 = new Core.GameObject('go2');
 		go2.transform.localPosition.set(101, 102);
-		//go2.transform.localScale.set(1.1, 1.2);
 		go2.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
-		go2.transform.setParent(go1.transform);
+		go2.transform.setParent(world.transform);
 
 		go2.transform.Update = function () {
 			Component.Transform.prototype.Update.call(this);
@@ -68,6 +114,7 @@ define(
 			this.text = Core.Time.getMeasuredFPS().toFixed(2);
 		}
 
+		/*
 		var titleGo = new Core.GameObject('Title');
 		titleGo.transform.localPosition.set(20, 400);
 		titleGo.addComponent(new Component.DisplayBitmapText("SPACE FLIGHT MODULE TEST", setupDisplayBitmapTextSpriteSheet()));
@@ -78,15 +125,14 @@ define(
 		debug.addComponent(debugDisplayText);
 		debug.transform.setParent(gui.transform);
 
+		//FIXME: need a localToCamera() function.
 		debugDisplayText.Update = function () {
-			var g1p = go1.transform.localToGlobal(0,0);
-			var g2p = go2.transform.localToGlobal(0,0);
-			//console.log(g2p);
-			this.gameObject.transform.localPosition.set(g2p);
-			this.text = "x: " + g1p.x.toFixed(2) + " y: " + g1p.y.toFixed(2) +"\nx: " + g2p.x.toFixed(2) + " y: " + g2p.y.toFixed(2);
-		//debugger;
+		var g1p = go1.transform.localToGlobal(0,0);
+		var g2p = go2.transform.localToGlobal(0,0);
+		this.gameObject.transform.localPosition.set(g2p);
+		this.text = "x: " + g1p.x.toFixed(2) + " y: " + g1p.y.toFixed(2) +"\nx: " + g2p.x.toFixed(2) + " y: " + g2p.y.toFixed(2);
 		}
-
+		 */
 		scene.Awake();
 		this.display.runScene(scene);
 	};

@@ -1,7 +1,7 @@
 define(
 	'EaselDisplay',
 	['underscore', 'easel', 'preload', 'Core', 'Component',
-		'Core/Time', 'Core/SpriteSheet', 'Component/DisplayItem', 'Component/Transform', 'Component/DisplayText', 'Component/DisplayBitmap', 'Component/DisplayBitmapText'],
+		'Core/Time', 'Core/SpriteSheet', 'Core/Input', 'Component/DisplaySprite', 'Component/Camera', 'Component/DisplayItem', 'Component/Transform', 'Component/DisplayText', 'Component/DisplayBitmap', 'Component/DisplayBitmapText'],
 
 	function (_, createjs, preload, Core, Component) {
 	"use strict";
@@ -40,63 +40,82 @@ define(
 		return (results && results.length > 1) ? results[1] : "";
 	};
 
-	//FIXME: split these switches and use an array of types, then I simply call the 
+	//FIXME: split these switches and use an array of types, then I simply call the
 	// function directly via the array, i can then do the inject and update in one round.
 	EaselDisplay.prototype.setupInjections = function () {
+		var display = this;
 		//alias the injectionPoint for use in the below functiuon.
 		var ip = this.injectPoint;
 		//here we inject easle into everything we care about and hookup the hierarchy
 		this.scene.recursiveCallbackOnComponents(function () {
-			//console.log("EaselDisplay:setupInjections", this);
-			var t = {};
+			var t = this[ip] || {};
 
 			if (this instanceof Component.Transform) {
 				t.display = new createjs.Container();
 			} else if (this instanceof Component.DisplayBitmap) {
-				t.display = new createjs.Bitmap(this.imageUri); //FIXME: setup preload
-				this.image = t.display.image;
+				if (!this.image) {
+					t.display = new createjs.Bitmap(this.imageUri); //FIXME: setup preload
+					this.image = t.display.image;
+				} else {
+					t.display = new createjs.Bitmap(this.image);
+				}
 			} else if (this instanceof Component.DisplayText) {
 				t.display = new createjs.Text();
 				//t.display.textBaseline = "alphabetic";
 			} else if (this instanceof Component.DisplayBitmapText) {
 				//inject into the sprite sheet
 				//FIXME: check that we have not already injected this...
-				var ss = this.spriteSheet;
-				var data = {
-					images: ss.imageUris,
-					frames: ss.frames,
-					animations: ss.animations
-				};
-				var sso = new createjs.SpriteSheet(data);
-				ss[ip] = {
-					display: sso
-				};
-				t.display = new createjs.BitmapText(this.text, sso);
+				var spriteSheetObject = display.injectSpriteSheet(this.spriteSheet);
+				t.display = new createjs.BitmapText(this.text, spriteSheetObject);
+			} else if (this instanceof Component.DisplaySprite) {
+				var spriteSheetObject = display.injectSpriteSheet(this.spriteSheet);
+				t.display = new createjs.Sprite(spriteSheetObject, this.frameOrAnimation);
+			} else if (this instanceof Component.Camera) {
+				t.target = this.getTarget()[ip].display;
 			} else {
 				console.error("Unknown type", this);
 				return;
 			}
 
-			if (!(this instanceof Component.Transform)) {
+			if (this instanceof Component.Camera) {
+				//Do nothing
+			} else if (this instanceof Component.Transform) {
+				if (this.gameObject.transform.parent != undefined) {
+					this.gameObject.transform.parent[ip].display.addChild(t.display);
+				}
+			} else {
 				this.gameObject.transform[ip].display.addChild(t.display);
-			} else if (this.gameObject.transform.parent != undefined) {
-				this.gameObject.transform.parent[ip].display.addChild(t.display);
 			}
 
 			this[ip] = t;
 		});
 		this.stage.addChild(this.scene.transform[ip].display);
 
-		//now go though and populate the object values.. could do thi sat the same time but didnt want to duplicate teh setting.
+		//now go though and populate the object values.. could do this at the same time but didnt want to duplicate the setting.
 		this.updateInjections();
 	};
 
-	EaselDisplay.prototype.updateInjections = function () {
-		//alias the injectionPoint for use in the below functiuon.
+	EaselDisplay.prototype.injectSpriteSheet = function (spriteSheet) {
 		var ip = this.injectPoint;
-		//here we inject easle into everything we care about and hookup the hierarchy
+		var t = spriteSheet[ip] || {};
+		if (!t.display) {
+			var data = {
+				images: spriteSheet.imageUris,
+				frames: spriteSheet.frames,
+				animations: spriteSheet.animations
+			};
+			var spriteSheetObject = new createjs.SpriteSheet(data);
+			t.display = spriteSheetObject;
+			spriteSheet[ip] = t;
+		}
+		return t.display;
+	}
+
+	EaselDisplay.prototype.updateInjections = function () {
+		var display = this;
+		var ip = this.injectPoint;
+
 		this.scene.recursiveCallbackOnComponents(function () {
-			//console.log("EaselDisplay:updateInjections", this);
 			var t = this[ip];
 
 			if (t == undefined) {
@@ -123,23 +142,69 @@ define(
 				t.display.color = this.color;
 			} else if (this instanceof Component.DisplayBitmapText) {
 				t.display.text = this.text;
+			} else if (this instanceof Component.DisplaySprite) {
+				t.display.paused = this.paused;
+			} else if (this instanceof Component.Camera) {
+				return;
 			} else {
 				console.error("Unknown type", this);
 				return;
 			}
 			t.display.regX = this.centerPosition.x;
 			t.display.regY = this.centerPosition.y;
+
+			if (this instanceof Component.DisplayItem) {
+				t.display.x = this.offset.x;
+				t.display.y = this.offset.y;
+				t.display.rotation = this.rotation;
+				t.display.scaleX = this.scale.x;
+				t.display.scaleY = this.scale.y;
+			}
 		});
 
 		this.stage.addChild(this.scene.transform[ip].display);
 	};
 
+	EaselDisplay.prototype.updateCamera = function () {
+		var cameraGo = this.scene.camera;
+		if (cameraGo == undefined) {
+			return;
+		}
+		var cameraCom = cameraGo.getComponentsByType(Component.Camera)[0];
+		if (cameraCom == undefined) {
+			return;
+		}
+		var t = cameraCom[this.injectPoint];
+		if (t == undefined || t.target == undefined) {
+			return;
+		}
+
+		//make the cammera the center of the world
+		var matrix = cameraGo.transform.getConcatenatedMatrix(new Core.Matrix3x3());
+		var d = matrix.decompose();
+		if (cameraCom.displaceTarget) {
+			t.target.regX = d.x;
+			t.target.regY = d.y;
+		}
+		t.target.x = this.width / 2;
+		t.target.y = this.height / 2;
+
+		if (cameraCom.rotateTarget) {
+			t.target.rotation = -d.rotation;
+		}
+		if (cameraCom.scaleTarget) {
+			t.target.scaleX = d.scaleX * cameraCom.zoomLevel;
+			t.target.scaleY = d.scaleY * cameraCom.zoomLevel;
+		}
+	}
+
 	EaselDisplay.prototype.startScene = function () {
 		var display = this;
-		createjs.Ticker.setFPS(15);
-//createjs.Ticker.setFPS(1);
+		createjs.Ticker.setFPS(30);
+		//createjs.Ticker.setFPS(1);
 		//FIXME: move the scene updating out of here
 		createjs.Ticker.addEventListener("tick", function (event) {
+			Core.Input.startTick();
 
 			//FIXME: need a better way to do this
 			//patch in the frame rate stuff...
@@ -151,7 +216,10 @@ define(
 
 			display.scene.Update();
 			display.updateInjections();
+			display.updateCamera();
 			display.stage.update();
+
+			Core.Input.endTick();
 		});
 	};
 

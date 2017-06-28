@@ -1,11 +1,11 @@
 define(
 	'Core/GameObject',
 	['Core', 'Component',
-		'Core/Component', 'Component/Transform', 'Component/Transform'],
+		 'Core/Component', 'Component/Transform', 'Component/Transform'],
 	function (Core, Component) {
 	"use strict";
 	function GameObject(name) {
-		this.name = name;
+		this.name = name||'New GameObject';
 		this.components = new Array();
 		this.transform = undefined;
 		this.addComponent(new Component.Transform());
@@ -59,6 +59,13 @@ define(
 
 	GameObject.prototype.getChildren = function () {
 		return this.transform.getChildren();
+	};
+
+	GameObject.prototype.getScene = function() {
+		var t = this.transform;
+		while (t.parent) { t = t.parent; }
+		if (t.gameObject instanceof Core.Scene) { return t.gameObject; }
+		return null;
 	};
 
 	Core.GameObject = GameObject;

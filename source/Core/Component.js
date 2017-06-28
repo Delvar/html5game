@@ -12,7 +12,7 @@ define(
 		return this;
 	};
 
-	Component.prototype.getGameObject = function (gameObject) {
+	Component.prototype.getGameObject = function () {
 		return this.gameObject;
 	};
 

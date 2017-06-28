@@ -217,9 +217,7 @@ function setEventListeners() {
 		zoomLevel -= (event.deltaY / (1000 / zoomLevel));
 		var min = 0.1,
 		max = 5;
-
 		zoomLevel = Math.min(Math.max(min, zoomLevel), max);
-		console.log(zoomLevel);
 	}, true);
 
 	canvas.focus();
