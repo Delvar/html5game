@@ -1,7 +1,7 @@
 define(
 	'EaselDisplay',
 	['underscore', 'easel', 'preload', 'Core', 'Component',
-		'Core/Time', 'Core/SpriteSheet', 'Core/Input', 'Component/DisplaySprite', 'Component/Camera', 'Component/DisplayItem', 'Component/Transform', 'Component/DisplayText', 'Component/DisplayBitmap', 'Component/DisplayBitmapText'],
+		'Core/Time', 'Core/SpriteSheet', 'Core/Input', 'Component/DisplayRawEaselShape', 'Component/DisplaySprite', 'Component/Camera', 'Component/DisplayItem', 'Component/Transform', 'Component/DisplayText', 'Component/DisplayBitmap', 'Component/DisplayBitmapText'],
 
 	function (_, createjs, preload, Core, Component) {
 	"use strict";
@@ -32,6 +32,7 @@ define(
 
 	EaselDisplay.prototype.setScene = function (scene) {
 		this.scene = scene;
+		this.scene.displaySize.set(this.stage.canvas.width,this.stage.canvas.height);
 	};
 
 	function getName() {
@@ -72,6 +73,12 @@ define(
 				t.display = new createjs.Sprite(spriteSheetObject, this.frameOrAnimation);
 			} else if (this instanceof Component.Camera) {
 				t.target = this.getTarget()[ip].display;
+			} else if (this instanceof Component.DisplayRawEaselShape) {
+				if (!this.shape) {
+					this.shape = new createjs.Shape();
+					this.shape.graphics.setStrokeStyle(4).beginFill(createjs.Graphics.getRGB(0,0,0,0)).beginStroke("#FF0000").drawCircle(0, 0, 50);
+				}
+				t.display = this.shape;
 			} else {
 				console.error("Unknown type", this);
 				return;
@@ -146,6 +153,8 @@ define(
 				t.display.paused = this.paused;
 			} else if (this instanceof Component.Camera) {
 				return;
+			} else if (this instanceof Component.DisplayRawEaselShape) {
+				//nothing
 			} else {
 				console.error("Unknown type", this);
 				return;
@@ -200,7 +209,7 @@ define(
 
 	EaselDisplay.prototype.startScene = function () {
 		var display = this;
-		createjs.Ticker.setFPS(30);
+		createjs.Ticker.setFPS(60);
 		//createjs.Ticker.setFPS(1);
 		//FIXME: move the scene updating out of here
 		createjs.Ticker.addEventListener("tick", function (event) {
@@ -224,7 +233,7 @@ define(
 	};
 
 	EaselDisplay.prototype.runScene = function (scene) {
-		this.scene = scene;
+		this.setScene(scene);
 		this.setupInjections();
 		this.startScene();
 	};

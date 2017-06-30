@@ -34,6 +34,7 @@
                 <File name="source\Component\Transform.js" />
                 <File name="source\Component\DisplayBitmapText.js" />
                 <File name="source\Component\DisplaySprite.js" />
+                <File name="source\Component\DisplayRawEaselShape.js" />
             </Folder>
             <Folder name="Core">
                 <File name="source\Core\Component.js" />

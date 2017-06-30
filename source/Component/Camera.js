@@ -15,7 +15,7 @@ define(
 
 		this.zoomLevel = 1;
 		this.zoomLevelMin = 0.1;
-		this.zoomLevelMax = 5;
+		this.zoomLevelMax = 1;
 	}
 
 	Camera.prototype = Object.create(Core.Component.prototype);

@@ -1,12 +1,13 @@
 define(
 	'Core/Scene',
 	['Core', 'Component', 'underscore',
-		'Core/GameObject', 'Component/Transform'],
+		'Core/GameObject', 'Core/Vector2', 'Component/Transform'],
 	function (Core, Component, _) {
 	"use strict";
 	function Scene() {
 		Core.GameObject.call(this, 'Scene');
 		this.camera = undefined;
+		this.displaySize = new Core.Vector2(512,512);
 	}
 
 	Scene.prototype = Object.create(Core.GameObject.prototype);
