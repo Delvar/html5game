@@ -6,31 +6,33 @@ define(
 	"use strict";
 	function Camera() {
 		Core.Component.call(this);
-		//target is the transform we use as the world base.
-		this.target = undefined;
+		//world is the transform we use as the world base.
+		this.world = undefined;
 
-		this.displaceTarget = true;
-		this.rotateTarget = false;
-		this.scaleTarget = true;
+		this.displaceWorld = true;
+		this.rotateWorld = false;
+		this.scaleWorld = true;
 
 		this.zoomLevel = 1;
 		this.zoomLevelMin = 0.1;
 		this.zoomLevelMax = 1;
+
+		this.displaySize = new Core.Vector2(window.innerWidth, window.innerHeight);
 	}
 
 	Camera.prototype = Object.create(Core.Component.prototype);
 	Camera.prototype.constructor = Camera;
 
-	Camera.prototype.setTarget = function (target) {
-		//FIXME: check that target is a transform
-		this.target = target;
+	Camera.prototype.setWorld = function (world) {
+		//FIXME: check that world is a transform
+		this.world = world;
 		return this;
 	};
 
-	Camera.prototype.getTarget = function () {
-		return this.target;
+	Camera.prototype.getWorld = function () {
+		return this.world;
 	};
-		
+
 	Component.Camera = Camera;
 	return Camera;
 });

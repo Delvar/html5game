@@ -1,9 +1,9 @@
 define(
 	'FlightModule',
-	['underscore', 'easel', 'Core', 'Component',
-		'Core/Vector2', 'Core/Vector3', 'Core/Vector4', 'Core/GameObject', 'Core/Scene', 'Core/Time', 'Core/SpriteSheet', 'Core/Input', 'Component/DisplaySprite',
-		'Component/Camera', 'Component/DisplayBitmap', 'Component/DisplayText'],
-	function (_, createjs, Core, Component) {
+	['underscore', 'easel', 'Core', 'Component', 'Script',
+		'Core/Scene', 'Script/PlayerController', 'Script/CameraController', 'Component/DisplayBitmap', 'Script/Fps', 'Script/ParalaxStars',
+		'Component/Camera', 'Component/DisplayText', ],
+	function (_, createjs, Core, Component, Script) {
 	"use strict";
 	function FlightModule(display) {
 		this.display = display;
@@ -11,175 +11,66 @@ define(
 
 	FlightModule.prototype.run = function () {
 		var scene = new Core.Scene();
-
-		var go1 = new Core.GameObject('go1');
-
-		var starsGo = setupStars(go1);
-		starsGo.transform.setParent(scene.transform);
-
 		var world = new Core.GameObject("World");
+		var gui = new Core.GameObject("Gui");
+		var player = setupPlayer();
+		var camera = setupCamera(player, world);
+		var fps = setupFps();
+		var paralaxStars = setupParalaxStars(player, camera);
+
+		var npc = new Core.GameObject('Npc');
+		npc.transform.localPosition.set(101, 102);
+		npc.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
+		npc.transform.setParent(world.transform);
+
+		paralaxStars.transform.setParent(scene.transform);
 		world.transform.setParent(scene.transform);
-
-		var gui = new Core.GameObject("GUI");
+		player.transform.setParent(world.transform);
+		camera.transform.setParent(player.transform);
 		gui.transform.setParent(scene.transform);
+		fps.transform.setParent(gui.transform);
 
-		go1.transform.localPosition.set(0, 0);
+		scene.setCamera(camera);
+		scene.Awake();
+		this.display.runScene(scene);
+	}
 
-		go1.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
-		go1.transform.setParent(world.transform);
+	function setupPlayer() {
+		var player = new Core.GameObject('Player');
+		player.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
+		player.addComponent(new Script.PlayerController());
+		return player;
+	}
 
-		go1.transform.Update = function () {
-			Component.Transform.prototype.Update.call(this);
-			if (Core.Input.isDown("W".charCodeAt(0)) || Core.Input.isDown(38)) {
-				this.localPosition.add(this.forward.multiply(Core.Time.deltaSeconds * 512));
-			}
-			if (Core.Input.isDown("S".charCodeAt(0)) || Core.Input.isDown(40)) {
-				this.localPosition.add(this.forward.multiply(Core.Time.deltaSeconds * -512));
-			}
-			if (Core.Input.isDown("A".charCodeAt(0))) {
-				this.localPosition.add(this.right.multiply(Core.Time.deltaSeconds * -512));
-			}
-			if (Core.Input.isDown("D".charCodeAt(0))) {
-				this.localPosition.add(this.right.multiply(Core.Time.deltaSeconds * 512));
-			}
-			if (Core.Input.isDown(37)) {
-				this.localRotation -= Core.Time.deltaSeconds * 180;
-			}
-			if (Core.Input.isDown(39)) {
-				this.localRotation += Core.Time.deltaSeconds * 180;
-			}
-		}
+	function setupCamera(player, world) {
+		var camera = new Core.GameObject('Camera');
+		var cameraComponent = new Component.Camera();
+		var cameraController = new Script.CameraController();
+		cameraComponent.setWorld(world.transform);
+		cameraController.setCameraComponent(cameraComponent);
 
-		var cameraGo = new Core.GameObject('camera');
-		var cameraCom = new Component.Camera();
-		cameraGo.addComponent(cameraCom);
-		cameraGo.transform.setParent(go1.transform);
-		cameraCom.setTarget(world.transform);
-		scene.setCamera(cameraGo);
+		cameraComponent.zoomLevel = 1;
+		cameraComponent.zoomLevelMin = 0.5;
+		cameraComponent.zoomLevelMax = 1;
 
-		cameraCom.Update = function () {
-			Component.Transform.prototype.Update.call(this);
-			Core.Input._mouse.deltaY
-			this.zoomLevel -= (Core.Input._mouse.deltaY / (1000 / this.zoomLevel));
-			this.zoomLevel = Math.min(Math.max(this.zoomLevelMin, this.zoomLevel), this.zoomLevelMax);
+		camera.addComponent(cameraComponent);
+		camera.addComponent(cameraController);
+		return camera;
+	}
 
-			this.displaceTarget = Core.Input.isPressed("E".charCodeAt(0)) ? (!(this.displaceTarget)) : this.displaceTarget;
-			this.rotateTarget = Core.Input.isPressed("R".charCodeAt(0)) ? (!(this.rotateTarget)) : this.rotateTarget;
-			this.scaleTarget = Core.Input.isPressed("T".charCodeAt(0)) ? (!(this.scaleTarget)) : this.scaleTarget;
-
-		}
-
-		var go2 = new Core.GameObject('go2');
-		go2.transform.localPosition.set(101, 102);
-		go2.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
-		go2.transform.setParent(world.transform);
-
-		go2.transform.Update = function () {
-			Component.Transform.prototype.Update.call(this);
-			//this.localRotation += Core.Time.deltaSeconds * -90;
-		}
-
-		var fps = new Core.GameObject('fps');
+	function setupFps() {
+		var fps = new Core.GameObject('Fps');
 		fps.transform.localPosition.set(20, 20);
 		var fpsDisplayText = new Component.DisplayText("-", "20px 'Press Start 2P', cursive", "#ff7700");
 		fps.addComponent(fpsDisplayText);
-		fps.transform.setParent(gui.transform);
+		var fpsScript = new Script.Fps();
+		fpsScript.setTarget(fpsDisplayText);
+		fps.addComponent(fpsScript);
+		return fps;
+	}
 
-		fpsDisplayText.Update = function () {
-			this.text = Core.Time.getMeasuredFPS().toFixed(2);
-		}
-
-		scene.Awake();
-		this.display.runScene(scene);
-	};
-
-	function setupStars(focus) {
-		var starsGo = new Core.GameObject("Stars");
-
-		var tileGrid = 13;
-		//var tileSize = new Core.Vector2(512, 512);
-		var tileSize = new Core.Vector2(window.innerWidth, window.innerHeight);
-		starsGo.transform.focus = focus;
-		/*
-		var shapeCom = new Component.DisplayRawEaselShape();
-		shapeCom.shape = new createjs.Shape();
-		shapeCom.shape.graphics.setStrokeStyle(2).beginFill(createjs.Graphics.getRGB(255, 255, 255, 0.05)).beginStroke(createjs.Graphics.getRGB(255, 255, 255, 1)).drawCircle(0, 0, 30);
-		starsGo.addComponent(shapeCom);
-		 */
-		starsGo.transform.Update = function () {
-			Component.Transform.prototype.Update.call(this);
-			var scene = this.gameObject.getScene();
-			if (scene == undefined) {
-				return;
-			}
-
-			var cameraGo = scene.getCamera();
-			if (cameraGo == undefined) {
-				return;
-			}
-
-			this.focus = this.focus || cameraGo;
-
-			var cameraCom = cameraGo.getComponentsByType(Component.Camera)[0];
-			if (cameraCom == undefined) {
-				return;
-			}
-
-			//make the cammera the center of the world
-			//var matrix = cameraGo.transform.getConcatenatedMatrix(new Core.Matrix3x3());
-			var matrix = this.focus.transform.getConcatenatedMatrix(new Core.Matrix3x3());
-			var d = matrix.decompose();
-
-			var rotation = 0;
-			if (cameraCom.rotateTarget) {
-				rotation = -d.rotation;
-			}
-
-			var scale = new Core.Vector2(1, 1); //.multiply(0.5);
-			if (cameraCom.scaleTarget) {
-				//var mMin = 0.5, mMax = 1, tMin = cameraCom.zoomLevelMin, tMax = cameraCom.zoomLevelMax;
-				//var r = (cameraCom.zoomLevel - tMin) / (tMax - tMin);
-				//var z = (r*(mMax-mMin)) + mMin;
-				scale.set(cameraCom.zoomLevel, cameraCom.zoomLevel);
-			}
-
-			this.localRotation = rotation;
-			this.localScale.set(scale);
-			this.localPosition.set(new Core.Vector2(scene.displaySize).multiply(0.5));
-
-			for (var i = 0; i < this.layers.length; i++) {
-				var displace = new Core.Vector2(0, 0);
-				//if (cameraCom.displaceTarget) {
-				displace.x = d.x * (1 / (i + 1)); //%(tileSize.x*tileGrid);// * (1 / (i + 1));
-				displace.y = d.y * (1 / (i + 1)); //%(tileSize.y*tileGrid);// * (1 / (i + 1));
-				//}
-				this.layers[i].transform.centerPosition.set(displace);
-				//this.layers[i].transform.centerPosition.set(displace.x%tileSize.x,displace.y%tileSize.y);
-				var tilePos = new Core.Vector2(displace);
-				tilePos.x = Math.floor(tilePos.x / tileSize.x);
-				tilePos.y = Math.floor(tilePos.y / tileSize.y);
-				//console.log(tilePos);
-				var tilePos2 = new Core.Vector2(tilePos);
-
-				//console.log(tilePos, tilePos2);
-				//var rPos = new Core.Vector2(tilePos);
-				//rPos.x = rPos.x*-tileSize.x;
-				//rPos.y = rPos.y*-tileSize.y;
-				//this.layers[i].transform.centerPosition.set(rPos);
-
-				for (var j = 0, x = 0; x < tileGrid; x++) {
-					for (var y = 0; y < tileGrid; y++, j++) {
-						var tile = this.layers[i].transform.children[j];
-						//var text = tile.gameObject.getComponentsByType(Component.DisplayText)[0];
-						//text.text = tile.gameObject.name + "\n" + "[" + x + "," + y + "] : " + i;
-						//dont ask... 
-						tile.localPosition.x = (((Math.floor((tilePos.x + ((tileGrid - 1) - x)) / tileGrid) * tileGrid) + x)- (tileGrid/2)) * tileSize.x;
-						tile.localPosition.y = (((Math.floor((tilePos.y + ((tileGrid - 1) - y)) / tileGrid) * tileGrid) + y)- (tileGrid/2)) * tileSize.y;
-					}
-					//debugger;
-				}
-			}
-		}
+	function setupParalaxStars(player, camera) {
+		var paralaxStars = new Core.GameObject('Paralax Stars');
 
 		var data = {
 			"imageUris": ["images/Stars/stars001.png"],
@@ -194,83 +85,80 @@ define(
 			}
 		}
 		var spriteSheet = new Core.SpriteSheet(data);
+		var layerCount = 5;
 
-		var layers = new Array(4);
-		starsGo.transform.layers = layers;
-		var tiles = new Array(tileGrid * tileGrid);
+		var cameraCom = camera.getComponentsByType(Component.Camera)[0];
+		var gridSize = Math.floor((1 / cameraCom.zoomLevelMin) + 2);
+		var tileSize = new Core.Vector2(window.innerWidth, window.innerHeight);
 
-		for (var i = 0; i < layers.length; i++) {
-			var layer = new Core.GameObject("Stars-" + i);
-			layers[i] = layer;
+		var paralaxStarsScript = new Script.ParalaxStars();
+		paralaxStars.addComponent(paralaxStarsScript);
+		paralaxStarsScript.tileSize = tileSize;
+		paralaxStarsScript.gridSize = gridSize;
 
-			//FIXME: Debug for center of layer
-			//var shapeCom = new Component.DisplayRawEaselShape();
-			//shapeCom.shape = new createjs.Shape();
-			//shapeCom.shape.graphics.setStrokeStyle(2).beginFill(createjs.Graphics.getRGB(255, 0, 255, 0.05)).beginStroke(createjs.Graphics.getRGB(255, 0, 255, 1)).drawCircle(0, 0, 20);
-			//layer.addComponent(shapeCom);
+		//Do this backwards so the layers are in the right order, smallest to bigest.
+		//for (var i = layerCount-1; i >= 0; i--) {
+		for (var i = 0; i < layerCount; i++) {
+			var layer = new Core.GameObject("Paralax Stars-" + i);
+			layer.transform.setParent(paralaxStars.transform);
 
-			for (var j = 0, x = 0; x < tileGrid; x++) {
-				for (var y = 0; y < tileGrid; y++, j++) {
-					var tile = new Core.GameObject("[" + x + "," + y + "]"); // + i + "-" + j);
+			for (var j = 0, x = 0; x < gridSize; x++) {
+				for (var y = 0; y < gridSize; y++, j++) {
+					var tile = new Core.GameObject("Paralax Stars-" + i + "-[" + x + "," + y + "]");
 					tile.transform.setParent(layer.transform);
 					tile.transform.localPosition.set(x * tileSize.x, y * tileSize.y);
 
-					//FIXME: Debug for center of tile
-					//var debugShape2 = new createjs.Shape();
-					//debugShape2.graphics.setStrokeStyle(2).beginFill(createjs.Graphics.getRGB(255, 255, 0, 0.05)).beginStroke(createjs.Graphics.getRGB(255, 255, 0, 1)).drawCircle(0, 0, 10);
-					//var shapeCom = new Component.DisplayRawEaselShape();
-					//shapeCom.shape = debugShape2.clone();
-					//tile.addComponent(shapeCom);
-
-					//FIXME: Debug bounding box for the tile
-					//var shapeCom = new Component.DisplayRawEaselShape();
-					//shapeCom.shape = new createjs.Shape();
-					//shapeCom.shape.graphics.setStrokeStyle(4).beginFill(createjs.Graphics.getRGB(255, 0, 0, 0.05)).beginStroke(createjs.Graphics.getRGB(255, 0, 0, 1)).drawRect(0, 0, tileSize.x, tileSize.y);
-					//tile.addComponent(shapeCom);
-
-					for (var k = 0; k < (i/2 + 1); k++) {
+					for (var k = 0; k < (i / 2 + 1); k++) {
 						var frame = Math.floor((1 - Math.pow(Math.random(), 4)) * 16);
 						var sprite = new Component.DisplaySprite(spriteSheet, frame);
 						sprite.paused = true;
 						sprite.offset.set(Math.random() * tileSize.x, Math.random() * tileSize.y);
 						sprite.rotation = Math.random() * 360;
 						var scale = (0.3 + (Math.random() * 0.7));
-						/*
-						if (frame < 8) {
-						scale *= 0.25;
-						} else if (frame < 12) {
-						scale *= 0.5;
-						}*/
 						sprite.scale.set(scale, scale);
 						tile.addComponent(sprite);
-
-						/*
-						//FIXME: debug, star bounding box
-						var debugShape4 = new createjs.Shape();
-						debugShape4.graphics.setStrokeStyle(1).beginFill(createjs.Graphics.getRGB(0, 0, 255, 0.05)).beginStroke(createjs.Graphics.getRGB(0, 0, 255, 1)).drawRect(-128, -128, 256, 256);
-						shapeCom = new Component.DisplayRawEaselShape();
-						shapeCom.shape = debugShape4.clone();
-						shapeCom.offset = sprite.offset;
-						shapeCom.rotation = sprite.rotation;
-						shapeCom.scale.set(scale, scale);
-						tile.addComponent(shapeCom);*/
-
 					}
-
-					//FIXME: tile debug/bounding TileName
-					//var nameCom = new Component.DisplayText(tile.name, "100px Arial", "#ff7700");
-					//nameCom.offset.set(-200, -50);
-					//tile.addComponent(nameCom);
 				}
 			}
 		}
 
-		for (var i = layers.length - 1; i >= 0; i--) {
-			layers[i].transform.setParent(starsGo.transform);
-		}
-
-		return starsGo;
+		return paralaxStars;
 	}
+
+	//FIXME: Debug for center of layer
+	//var shapeCom = new Component.DisplayRawEaselShape();
+	//shapeCom.shape = new createjs.Shape();
+	//shapeCom.shape.graphics.setStrokeStyle(2).beginFill(createjs.Graphics.getRGB(255, 0, 255, 0.05)).beginStroke(createjs.Graphics.getRGB(255, 0, 255, 1)).drawCircle(0, 0, 20);
+	//layer.addComponent(shapeCom);
+
+	//FIXME: Debug for center of tile
+	//var debugShape2 = new createjs.Shape();
+	//debugShape2.graphics.setStrokeStyle(2).beginFill(createjs.Graphics.getRGB(255, 255, 0, 0.05)).beginStroke(createjs.Graphics.getRGB(255, 255, 0, 1)).drawCircle(0, 0, 10);
+	//var shapeCom = new Component.DisplayRawEaselShape();
+	//shapeCom.shape = debugShape2.clone();
+	//tile.addComponent(shapeCom);
+
+	//FIXME: Debug bounding box for the tile
+	//var shapeCom = new Component.DisplayRawEaselShape();
+	//shapeCom.shape = new createjs.Shape();
+	//shapeCom.shape.graphics.setStrokeStyle(4).beginFill(createjs.Graphics.getRGB(255, 0, 0, 0.05)).beginStroke(createjs.Graphics.getRGB(255, 0, 0, 1)).drawRect(0, 0, tileSize.x, tileSize.y);
+	//tile.addComponent(shapeCom);
+	/*
+	//FIXME: debug, star bounding box
+	var debugShape4 = new createjs.Shape();
+	debugShape4.graphics.setStrokeStyle(1).beginFill(createjs.Graphics.getRGB(0, 0, 255, 0.05)).beginStroke(createjs.Graphics.getRGB(0, 0, 255, 1)).drawRect(-128, -128, 256, 256);
+	shapeCom = new Component.DisplayRawEaselShape();
+	shapeCom.shape = debugShape4.clone();
+	shapeCom.offset = sprite.offset;
+	shapeCom.rotation = sprite.rotation;
+	shapeCom.scale.set(scale, scale);
+	tile.addComponent(shapeCom);*/
+	//FIXME: tile debug/bounding TileName
+	//var nameCom = new Component.DisplayText(tile.name, "100px Arial", "#ff7700");
+	//nameCom.offset.set(-200, -50);
+	//tile.addComponent(nameCom);
+
+
 	function setupDisplayBitmapTextSpriteSheet() {
 		var data = {
 			"imageUris": ["images/Vikramarka/komika_new.png"],

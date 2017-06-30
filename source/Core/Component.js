@@ -15,7 +15,7 @@ define(
 	Component.prototype.getGameObject = function () {
 		return this.gameObject;
 	};
-
+/*
 	Component.prototype.Awake = function () {
 		console.log("Awake", this);
 	};
@@ -40,7 +40,7 @@ define(
 	Component.prototype.OnEnabled = function () {
 		console.log("OnEnabled", this);
 	};
-
+*/
 	Core.Component = Component;
 	return Component;
 });

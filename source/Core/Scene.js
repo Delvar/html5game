@@ -1,13 +1,12 @@
 define(
 	'Core/Scene',
 	['Core', 'Component', 'underscore',
-		'Core/GameObject', 'Core/Vector2', 'Component/Transform'],
+		'Core/GameObject', 'Core/Vector2', 'Component/Transform', 'Component/Script'],
 	function (Core, Component, _) {
 	"use strict";
 	function Scene() {
 		Core.GameObject.call(this, 'Scene');
 		this.camera = undefined;
-		this.displaySize = new Core.Vector2(512,512);
 	}
 
 	Scene.prototype = Object.create(Core.GameObject.prototype);
@@ -22,8 +21,8 @@ define(
 	Scene.prototype.getCamera = function () {
 		return this.camera;
 	};
-	
-	Scene.prototype.recursiveCallbackOnComponents = function (func) {
+
+	Scene.prototype.recursiveCallbackOnComponents = function (func, typeList) {
 		var gameObjectQueue = new Array();
 		gameObjectQueue.push(this)
 		var gameObject,
@@ -37,56 +36,40 @@ define(
 						gameObjectQueue.push(child.gameObject);
 					});
 				}
-				func.call(component);
+				if (typeList != undefined) {
+					_.each(typeList, function (type) {
+						if (component instanceof type) {
+							func.call(component);
+						};
+					});
+				} else {
+					func.call(component);
+				}
 			});
 		}
 	}
 
 	Scene.prototype.Awake = function () {
 		this.recursiveCallbackOnComponents(function () {
-			this.Awake();
-		});
+			this.Awake && this.Awake();
+		}, [Component.Script]);
 	};
 	Scene.prototype.Start = function () {
 		this.recursiveCallbackOnComponents(function () {
-			this.Start();
-		});
+			this.Start && this.Start();
+		}, [Component.Script]);
 
 	};
 	Scene.prototype.Update = function () {
 		this.recursiveCallbackOnComponents(function () {
-			this.Update();
-		});
-
-	};
-	Scene.prototype.FixedUpdate = function () {
-		this.recursiveCallbackOnComponents(function () {
-			this.FixedUpdate();
-		});
+			this.Update && this.Update();
+		}, [Component.Script]);
 
 	};
 	Scene.prototype.LateUpdate = function () {
 		this.recursiveCallbackOnComponents(function () {
-			this.LateUpdate();
-		});
-
-	};
-	Scene.prototype.OnGUI = function () {
-		this.recursiveCallbackOnComponents(function () {
-			this.OnGUI();
-		});
-
-	};
-	Scene.prototype.OnDisable = function () {
-		this.recursiveCallbackOnComponents(function () {
-			this.OnDisable();
-		});
-
-	};
-	Scene.prototype.OnEnabled = function () {
-		this.recursiveCallbackOnComponents(function () {
-			this.OnEnabled();
-		});
+			this.LateUpdate && this.LateUpdate();
+		}, [Component.Script]);
 
 	};
 

@@ -9,15 +9,7 @@ define(
 		this.localPosition = new Core.Vector2(0, 0);
 		this.localRotation = 0;
 		this.localScale = new Core.Vector2(1, 1);
-		/*
-		this.worldPosition = new Core.Vector2(0, 0);
-		this.worldRotation = 0;
-		this.worldScale = new Core.Vector2(1, 1);
 
-		this.cameraPosition = new Core.Vector2(0, 0);
-		this.cameraRotation = 0;
-		this.cameraScale = new Core.Vector2(1, 1);
-		 */
 		this.centerPosition = new Core.Vector2(0, 0);
 		this.parent = undefined;
 		this.children = new Array();

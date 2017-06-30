@@ -35,6 +35,7 @@
                 <File name="source\Component\DisplayBitmapText.js" />
                 <File name="source\Component\DisplaySprite.js" />
                 <File name="source\Component\DisplayRawEaselShape.js" />
+                <File name="source\Component\Script.js" />
             </Folder>
             <Folder name="Core">
                 <File name="source\Core\Component.js" />
@@ -47,9 +48,6 @@
                 <File name="source\Core\SpriteSheet.js" />
                 <File name="source\Core\Input.js" />
                 <File name="source\Core\Matrix3x3.js" />
-            </Folder>
-            <Folder name="Display">
-                <File name="source\Display\StarField.js" />
             </Folder>
             <Folder name="experimental">
                 <File name="source\experimental\x.camera.js" />
@@ -67,6 +65,12 @@
             <File name="source\FlightModule.js" />
             <File name="source\Game.js" />
             <File name="source\Main.js" />
+            <Folder name="Script">
+                <File name="source\Script\ParalaxStars.js" />
+                <File name="source\Script\PlayerController.js" />
+                <File name="source\Script\CameraController.js" />
+                <File name="source\Script\Fps.js" />
+            </Folder>
         </Folder>
         <File name="index.html" />
         <File name="LICENSE" />

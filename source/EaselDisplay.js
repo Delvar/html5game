@@ -12,10 +12,6 @@ define(
 		//used to prefix the name of injected objects
 		this.id = Math.random().toString(36).substring(2, 6).toUpperCase();
 		this.injectPoint = '_EaselDisplay_' + this.id;
-
-		//FIXME: need to decide on how best to set the canvas size.
-		this.stage.canvas.width = window.innerWidth; //canvas.parentElement.clientWidth; //window.innerWidth;
-		this.stage.canvas.height = window.innerHeight; //canvas.parentElement.clientHeight;//window.innerHeight;
 	}
 
 	//hotwire the width and height to the canvas.
@@ -32,7 +28,9 @@ define(
 
 	EaselDisplay.prototype.setScene = function (scene) {
 		this.scene = scene;
-		this.scene.displaySize.set(this.stage.canvas.width,this.stage.canvas.height);
+		this.camera = scene.camera.getComponentsByType(Component.Camera)[0];
+		this.stage.canvas.width = this.camera.displaySize.x;
+		this.stage.canvas.height = this.camera.displaySize.y;
 	};
 
 	function getName() {
@@ -72,11 +70,11 @@ define(
 				var spriteSheetObject = display.injectSpriteSheet(this.spriteSheet);
 				t.display = new createjs.Sprite(spriteSheetObject, this.frameOrAnimation);
 			} else if (this instanceof Component.Camera) {
-				t.target = this.getTarget()[ip].display;
+				t.target = this.getWorld()[ip].display;
 			} else if (this instanceof Component.DisplayRawEaselShape) {
 				if (!this.shape) {
 					this.shape = new createjs.Shape();
-					this.shape.graphics.setStrokeStyle(4).beginFill(createjs.Graphics.getRGB(0,0,0,0)).beginStroke("#FF0000").drawCircle(0, 0, 50);
+					this.shape.graphics.setStrokeStyle(4).beginFill(createjs.Graphics.getRGB(0, 0, 0, 0)).beginStroke("#FF0000").drawCircle(0, 0, 50);
 				}
 				t.display = this.shape;
 			} else {
@@ -191,17 +189,17 @@ define(
 		//make the cammera the center of the world
 		var matrix = cameraGo.transform.getConcatenatedMatrix(new Core.Matrix3x3());
 		var d = matrix.decompose();
-		if (cameraCom.displaceTarget) {
+		if (cameraCom.displaceWorld) {
 			t.target.regX = d.x;
 			t.target.regY = d.y;
 		}
 		t.target.x = this.width / 2;
 		t.target.y = this.height / 2;
 
-		if (cameraCom.rotateTarget) {
+		if (cameraCom.rotateWorld) {
 			t.target.rotation = -d.rotation;
 		}
-		if (cameraCom.scaleTarget) {
+		if (cameraCom.scaleWorld) {
 			t.target.scaleX = d.scaleX * cameraCom.zoomLevel;
 			t.target.scaleY = d.scaleY * cameraCom.zoomLevel;
 		}
@@ -224,6 +222,8 @@ define(
 			Core.Time.deltaSeconds = event.delta / 1000;
 
 			display.scene.Update();
+			display.scene.LateUpdate();
+
 			display.updateInjections();
 			display.updateCamera();
 			display.stage.update();
