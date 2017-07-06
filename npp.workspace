@@ -36,6 +36,7 @@
                 <File name="source\Component\DisplaySprite.js" />
                 <File name="source\Component\DisplayRawEaselShape.js" />
                 <File name="source\Component\Script.js" />
+                <File name="source\Component\Rigidbody.js" />
             </Folder>
             <Folder name="Core">
                 <File name="source\Core\Component.js" />
@@ -48,6 +49,9 @@
                 <File name="source\Core\SpriteSheet.js" />
                 <File name="source\Core\Input.js" />
                 <File name="source\Core\Matrix3x3.js" />
+                <File name="source\Core\Ticker.js" />
+                <File name="source\Core\Event.js" />
+                <File name="source\Core\EventDispatcher.js" />
             </Folder>
             <Folder name="experimental">
                 <File name="source\experimental\x.camera.js" />

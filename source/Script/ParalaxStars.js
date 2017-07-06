@@ -22,7 +22,7 @@ define(
 			return;
 		}
 
-		var cameraGo = this.scene.getCamera();
+		var cameraGo = this.scene.getMainCamera();
 		if (cameraGo == undefined) {
 			return;
 		}
@@ -31,7 +31,7 @@ define(
 
 		this.camera = cameraGo.getComponentsByType(Component.Camera)[0];
 
-		this.gameObject.transform.localPosition.set(new Core.Vector2(this.camera.displaySize).multiply(0.5));
+		this.gameObject.transform.localPosition = this.camera.displaySize.multiply(0.5);
 	}
 
 	ParalaxStars.prototype.LateUpdate = function () {
@@ -39,7 +39,9 @@ define(
 			return;
 		}
 
-		var matrix = this.target.transform.getConcatenatedMatrix(new Core.Matrix3x3());
+		var interp = (Core.Time.updateTicker._lastTime - Core.Time.physicsTicker._lastTime)/1000;
+		
+		var matrix = this.target.transform.getConcatenatedMatrix(new Core.Matrix3x3(), interp);
 
 		var d = matrix.decompose();
 
@@ -49,36 +51,37 @@ define(
 			rotation = -d.rotation;
 		}
 
-		var scale = new Core.Vector2(1, 1);
+		var scale;
 
 		if (this.camera.scaleWorld) {
-			scale.set(this.camera.zoomLevel, this.camera.zoomLevel);
+			scale = new Core.Vector2(this.camera.zoomLevel, this.camera.zoomLevel);
+		} else {
+			scale = new Core.Vector2(1, 1);
 		}
 
 		this.gameObject.transform.localRotation = rotation;
-		this.gameObject.transform.localScale.set(scale);
+		this.gameObject.transform.localScale = scale.clone();
 
 		var layers = this.gameObject.transform.children;
 		var l = layers.length;
 		for (var i = 0; i < l; i++) {
-			var displace = new Core.Vector2(0, 0);
+			var displace
+
 			if (this.camera.displaceWorld) {
-				displace.x = d.x * (1 / (l - i));
-				displace.y = d.y * (1 / (l - i));
+				var t = (1 / (l - i));
+				displace = new Core.Vector2(d.x * t, d.y * t);
+			} else {
+				displace = new Core.Vector2(0, 0);
 			}
 
-			layers[i].centerPosition.set(displace);
+			layers[i].centerPosition = displace;
 
-			var tilePos = new Core.Vector2(displace);
-			tilePos.x = Math.floor(tilePos.x / this.tileSize.x);
-			tilePos.y = Math.floor(tilePos.y / this.tileSize.y);
-			var tilePos2 = new Core.Vector2(tilePos);
+			var tilePos = new Core.Vector2(displace.x / this.tileSize.x, displace.y / this.tileSize.y);
 
 			for (var j = 0, x = 0; x < this.gridSize; x++) {
 				for (var y = 0; y < this.gridSize; y++, j++) {
-					var tile = layers[i].children[j];
-					tile.localPosition.x = (((Math.floor((tilePos.x + ((this.gridSize - 1) - x)) / this.gridSize) * this.gridSize) + x) - (this.gridSize / 2)) * this.tileSize.x;
-					tile.localPosition.y = (((Math.floor((tilePos.y + ((this.gridSize - 1) - y)) / this.gridSize) * this.gridSize) + y) - (this.gridSize / 2)) * this.tileSize.y;
+					layers[i].children[j].localPosition = new Core.Vector2((((Math.floor((tilePos.x + ((this.gridSize - 1) - x)) / this.gridSize) * this.gridSize) + x) - (this.gridSize / 2)) * this.tileSize.x,
+							(((Math.floor((tilePos.y + ((this.gridSize - 1) - y)) / this.gridSize) * this.gridSize) + y) - (this.gridSize / 2)) * this.tileSize.y);
 				}
 			}
 		}

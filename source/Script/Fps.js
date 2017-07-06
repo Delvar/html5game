@@ -17,7 +17,10 @@ define(
 	}
 
 	Fps.prototype.Update = function () {
-		this.target.text = Core.Time.getMeasuredFPS().toFixed(2);
+		this.target.text =
+			' P:' + Core.Time.physicsTicker.getMeasuredFPS().toFixed(2) +
+			' G:' + Core.Time.graphicsTicker.getMeasuredFPS().toFixed(2) +
+			' U:' + Core.Time.updateTicker.getMeasuredFPS().toFixed(2);
 	}
 
 	Script.Fps = Fps;

@@ -17,7 +17,7 @@ define(
 		this.zoomLevelMin = 0.1;
 		this.zoomLevelMax = 1;
 
-		this.displaySize = new Core.Vector2(window.innerWidth, window.innerHeight);
+		this.displaySize = new Core.Vector2(128,128);
 	}
 
 	Camera.prototype = Object.create(Core.Component.prototype);

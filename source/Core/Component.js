@@ -15,32 +15,32 @@ define(
 	Component.prototype.getGameObject = function () {
 		return this.gameObject;
 	};
-/*
+	/*
 	Component.prototype.Awake = function () {
-		console.log("Awake", this);
+	console.log("Awake", this);
 	};
 	Component.prototype.Start = function () {
-		console.log("Start", this);
+	console.log("Start", this);
 	};
 	Component.prototype.Update = function () {
-		//console.log("Update", this);
+	//console.log("Update", this);
 	};
 	Component.prototype.FixedUpdate = function () {
-		console.log("FixedUpdate", this);
+	console.log("FixedUpdate", this);
 	};
 	Component.prototype.LateUpdate = function () {
-		console.log("LateUpdate", this);
+	console.log("LateUpdate", this);
 	};
 	Component.prototype.OnGUI = function () {
-		console.log("OnGUI", this);
+	console.log("OnGUI", this);
 	};
 	Component.prototype.OnDisable = function () {
-		console.log("OnDisable", this);
+	console.log("OnDisable", this);
 	};
 	Component.prototype.OnEnabled = function () {
-		console.log("OnEnabled", this);
+	console.log("OnEnabled", this);
 	};
-*/
+	 */
 	Core.Component = Component;
 	return Component;
 });

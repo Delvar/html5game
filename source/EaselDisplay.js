@@ -9,6 +9,8 @@ define(
 		this.canvas = canvas;
 		this.stage = new createjs.Stage(canvas);
 		this.scene = undefined;
+		this.camera = undefined;
+
 		//used to prefix the name of injected objects
 		this.id = Math.random().toString(36).substring(2, 6).toUpperCase();
 		this.injectPoint = '_EaselDisplay_' + this.id;
@@ -20,6 +22,7 @@ define(
 			return this.stage.canvas.width;
 		}
 	});
+
 	Object.defineProperty(EaselDisplay.prototype, 'height', {
 		get: function () {
 			return this.stage.canvas.height;
@@ -28,15 +31,16 @@ define(
 
 	EaselDisplay.prototype.setScene = function (scene) {
 		this.scene = scene;
-		this.camera = scene.camera.getComponentsByType(Component.Camera)[0];
-		this.stage.canvas.width = this.camera.displaySize.x;
-		this.stage.canvas.height = this.camera.displaySize.y;
+		if (this.camera == undefined) {
+			this.setCamera(scene.mainCamera.getFirstComponentByType(Component.Camera));
+		}
 	};
 
-	function getName() {
-		var funcNameRegex = /function (.{1,})\(/;
-		var results = (funcNameRegex).exec((this).constructor.toString());
-		return (results && results.length > 1) ? results[1] : "";
+	EaselDisplay.prototype.setCamera = function (cameraComponent) {
+		this.camera = cameraComponent;
+		if (this.camera != undefined) {
+			this.camera.displaySize = new Core.Vector2(this.stage.canvas.width, this.stage.canvas.height);
+		}
 	};
 
 	//FIXME: split these switches and use an array of types, then I simply call the
@@ -117,6 +121,8 @@ define(
 	}
 
 	EaselDisplay.prototype.updateInjections = function () {
+		var interp = (Core.Time.graphicsTicker._lastTime - Core.Time.physicsTicker._lastTime)/1000;
+
 		var display = this;
 		var ip = this.injectPoint;
 
@@ -129,16 +135,22 @@ define(
 
 			//FIXME: check if these are dirty first!
 			if (this instanceof Component.Transform) {
-				t.display.x = this.gameObject.transform.localPosition.x;
-				t.display.y = this.gameObject.transform.localPosition.y;
-				t.display.rotation = this.gameObject.transform.localRotation;
+				if (this.gameObject.rigidbody != undefined) {
+					var intRigid = this.gameObject.rigidbody.getInterpolated(interp);
+					t.display.x = intRigid.localPosition.x;
+					t.display.y = intRigid.localPosition.y;
+					t.display.rotation = intRigid.localRotation;
+				} else {
+					t.display.x = this.localPosition.x;
+					t.display.y = this.localPosition.y;
+					t.display.rotation = this.localRotation;
+				}
 				t.display.scaleX = this.gameObject.transform.localScale.x;
 				t.display.scaleY = this.gameObject.transform.localScale.y;
 			} else if (this instanceof Component.DisplayBitmap) {
 				//FIXME: update image URI ?!!
 				if (this.autoCenter && t.display.isVisible()) {
-					this.centerPosition.x = t.display.image.width / 2;
-					this.centerPosition.y = t.display.image.height / 2;
+					this.centerPosition = new Core.Vector2(t.display.image.width / 2, t.display.image.height / 2);
 					this.autoCenter = false;
 				}
 			} else if (this instanceof Component.DisplayText) {
@@ -173,67 +185,52 @@ define(
 	};
 
 	EaselDisplay.prototype.updateCamera = function () {
-		var cameraGo = this.scene.camera;
-		if (cameraGo == undefined) {
+		if (this.camera == undefined) {
 			return;
 		}
-		var cameraCom = cameraGo.getComponentsByType(Component.Camera)[0];
-		if (cameraCom == undefined) {
-			return;
-		}
-		var t = cameraCom[this.injectPoint];
+
+		var t = this.camera[this.injectPoint];
 		if (t == undefined || t.target == undefined) {
 			return;
 		}
 
+		var interp = (Core.Time.graphicsTicker._lastTime - Core.Time.physicsTicker._lastTime)/1000;
+		
 		//make the cammera the center of the world
-		var matrix = cameraGo.transform.getConcatenatedMatrix(new Core.Matrix3x3());
+		var matrix = this.camera.gameObject.transform.getConcatenatedMatrix(new Core.Matrix3x3(),interp);
 		var d = matrix.decompose();
-		if (cameraCom.displaceWorld) {
+		if (this.camera.displaceWorld) {
 			t.target.regX = d.x;
 			t.target.regY = d.y;
 		}
+
 		t.target.x = this.width / 2;
 		t.target.y = this.height / 2;
 
-		if (cameraCom.rotateWorld) {
+		if (this.camera.rotateWorld) {
 			t.target.rotation = -d.rotation;
 		}
-		if (cameraCom.scaleWorld) {
-			t.target.scaleX = d.scaleX * cameraCom.zoomLevel;
-			t.target.scaleY = d.scaleY * cameraCom.zoomLevel;
+		if (this.camera.scaleWorld) {
+			t.target.scaleX = d.scaleX * this.camera.zoomLevel;
+			t.target.scaleY = d.scaleY * this.camera.zoomLevel;
 		}
 	}
 
 	EaselDisplay.prototype.startScene = function () {
-		var display = this;
-		createjs.Ticker.setFPS(60);
-		//createjs.Ticker.setFPS(1);
-		//FIXME: move the scene updating out of here
-		createjs.Ticker.addEventListener("tick", function (event) {
-			Core.Input.startTick();
-
-			//FIXME: need a better way to do this
-			//patch in the frame rate stuff...
-			Core.Time.delta = event.delta;
-			Core.Time.paused = event.paused;
-			Core.Time.time = event.time;
-			Core.Time.runTime = event.runTime;
-			Core.Time.deltaSeconds = event.delta / 1000;
-
-			display.scene.Update();
-			display.scene.LateUpdate();
-
-			display.updateInjections();
-			display.updateCamera();
-			display.stage.update();
-
-			Core.Input.endTick();
-		});
+		Core.Time.graphicsTicker.on("tick", function (event) {
+			this.updateInjections();
+			this.updateCamera();
+			this.stage.update();
+		},this);
 	};
 
-	EaselDisplay.prototype.runScene = function (scene) {
-		this.setScene(scene);
+	EaselDisplay.prototype.runScene = function (scene, camera) {
+		if (scene != undefined) {
+			this.setScene(scene);
+		}
+		if (camera != undefined) {
+			this.setCamera(camera);
+		}
 		this.setupInjections();
 		this.startScene();
 	};

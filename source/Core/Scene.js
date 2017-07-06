@@ -6,20 +6,20 @@ define(
 	"use strict";
 	function Scene() {
 		Core.GameObject.call(this, 'Scene');
-		this.camera = undefined;
+		this.mainCamera = undefined;
 	}
 
 	Scene.prototype = Object.create(Core.GameObject.prototype);
 	Scene.prototype.constructor = Scene;
 
-	Scene.prototype.setCamera = function (camera) {
+	Scene.prototype.setMainCamera = function (mainCamera) {
 		//FIXME: check that camera is a camera component
-		this.camera = camera;
+		this.mainCamera = mainCamera;
 		return this;
 	};
 
-	Scene.prototype.getCamera = function () {
-		return this.camera;
+	Scene.prototype.getMainCamera = function () {
+		return this.mainCamera;
 	};
 
 	Scene.prototype.recursiveCallbackOnComponents = function (func, typeList) {
@@ -73,6 +73,13 @@ define(
 
 	};
 
+	Scene.prototype.FixedUpdate = function () {
+		this.recursiveCallbackOnComponents(function () {
+			this.FixedUpdate && this.FixedUpdate();
+		}, [Component.Rigidbody,Component.Script]);
+
+	};
+	
 	Core.Scene = Scene;
 	return Scene;
 });

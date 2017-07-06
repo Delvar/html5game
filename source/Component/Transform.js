@@ -93,28 +93,34 @@ define(
 		}
 	});
 
-	Transform.prototype.getMatrix = function (matrix) {
+	Transform.prototype.getMatrix = function (matrix, interp) {
 		if (matrix == undefined) {
 			matrix = new Core.Matrix3x3();
 		}
 		matrix.identity();
-		matrix.appendTransform(this.localPosition.x, this.localPosition.y, this.localScale.x, this.localScale.y, this.localRotation, this.centerPosition.x, this.centerPosition.y);
+		
+		if (interp!= undefined && this.gameObject.rigidbody != undefined) {
+			var r = this.gameObject.rigidbody.getInterpolated(interp);
+			matrix.appendTransform(r.localPosition.x, r.localPosition.y, this.localScale.x, this.localScale.y, r.localRotation, this.centerPosition.x, this.centerPosition.y);
+		} else {
+			matrix.appendTransform(this.localPosition.x, this.localPosition.y, this.localScale.x, this.localScale.y, this.localRotation, this.centerPosition.x, this.centerPosition.y);
+		}
 		return matrix;
 	};
 
 	//FIXME: cache the matrix of parents so we dont recalculate them every time
-	Transform.prototype.getConcatenatedMatrix = function (matrix) {
+	Transform.prototype.getConcatenatedMatrix = function (matrix, interp) {
 		if (matrix == undefined) {
 			matrix = new Core.Matrix3x3();
 		}
 		var o = this;
-		this.getMatrix(matrix);
+		this.getMatrix(matrix, interp);
 		while (o = o.parent) {
-			matrix.prependMatrix(o.getMatrix(new Core.Matrix3x3()));
+			matrix.prependMatrix(o.getMatrix(new Core.Matrix3x3(), interp));
 		}
 		return matrix;
 	};
-
+	
 	Transform.prototype.localToGlobal = function (x, y, pt) {
 		return this.getConcatenatedMatrix(new Core.Matrix3x3()).transformPoint(x, y, pt || new Core.Vector2());
 	};

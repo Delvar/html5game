@@ -1,8 +1,8 @@
 define(
 	'FlightModule',
 	['underscore', 'easel', 'Core', 'Component', 'Script',
-		'Core/Scene', 'Script/PlayerController', 'Script/CameraController', 'Component/DisplayBitmap', 'Script/Fps', 'Script/ParalaxStars',
-		'Component/Camera', 'Component/DisplayText', ],
+		'Core/Ticker', 'Core/Scene', 'Script/PlayerController', 'Script/CameraController', 'Component/DisplayBitmap', 'Script/Fps', 'Script/ParalaxStars',
+		'Component/Camera', 'Component/DisplayText', 'Component/Rigidbody'],
 	function (_, createjs, Core, Component, Script) {
 	"use strict";
 	function FlightModule(display) {
@@ -19,7 +19,7 @@ define(
 		var paralaxStars = setupParalaxStars(player, camera);
 
 		var npc = new Core.GameObject('Npc');
-		npc.transform.localPosition.set(101, 102);
+		npc.transform.localPosition = new Core.Vector2(101, 102);
 		npc.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
 		npc.transform.setParent(world.transform);
 
@@ -30,15 +30,66 @@ define(
 		gui.transform.setParent(scene.transform);
 		fps.transform.setParent(gui.transform);
 
-		scene.setCamera(camera);
+		scene.setMainCamera(camera);
 		scene.Awake();
-		this.display.runScene(scene);
+		this.scene = scene;
+
+		//Ticker.RAF
+		//Ticker.useRAF = true;
+		//Core.Ticker.timingMode = Core.Ticker.RAF;
+		//Core.Ticker.setFPS(60);
+		Core.Time.updateTicker.on("tick", function (event) {
+			Core.Input.startTick();
+
+			Core.Time.delta = event.delta;
+			Core.Time.paused = event.paused;
+			Core.Time.time = event.time;
+			Core.Time.runTime = event.runTime;
+			Core.Time.deltaSeconds = event.delta / 1000;
+
+			this.scene.Update();
+			this.scene.LateUpdate();
+
+			Core.Input.endTick();
+		}, this);
+
+		Core.Time.physicsTicker.on("tick", function (event) {
+			//Core.Input.startTick();
+
+			Core.Time.delta = event.delta;
+			Core.Time.paused = event.paused;
+			Core.Time.time = event.time;
+			Core.Time.runTime = event.runTime;
+			Core.Time.deltaSeconds = event.delta / 1000;
+
+			this.scene.FixedUpdate();
+
+			//Core.Input.endTick();
+		}, this);
+
+		//this.display.setScene(scene);
+		//this.display.setCamera(camera);
+		this.display.runScene(scene, camera.getFirstComponentByType(Component.Camera));
 	}
 
 	function setupPlayer() {
 		var player = new Core.GameObject('Player');
 		player.addComponent(new Component.DisplayBitmap('images/ships/MillionthVector/smallfighter/smallfighter0006.png'));
-		player.addComponent(new Script.PlayerController());
+		var pc = new Script.PlayerController();
+		pc.acceleration = 100;
+		pc.angularAcceleration = 360;
+		player.addComponent(pc);
+		var r = new Component.Rigidbody();
+		r.drag = 50;
+		r.minVelocity = 0.1;
+		r.maxVelocity = 500;
+
+		r.angularDrag = 300;
+		r.minAngularVelocity = 0.01; //FIXME: ?
+		r.maxAngularVelocity = 180; //FIXME: ?
+
+		player.addComponent(r);
+
 		return player;
 	}
 
@@ -60,7 +111,7 @@ define(
 
 	function setupFps() {
 		var fps = new Core.GameObject('Fps');
-		fps.transform.localPosition.set(20, 20);
+		fps.transform.localPosition = new Core.Vector2(20, 20);
 		var fpsDisplayText = new Component.DisplayText("-", "20px 'Press Start 2P', cursive", "#ff7700");
 		fps.addComponent(fpsDisplayText);
 		var fpsScript = new Script.Fps();
@@ -106,16 +157,20 @@ define(
 				for (var y = 0; y < gridSize; y++, j++) {
 					var tile = new Core.GameObject("Paralax Stars-" + i + "-[" + x + "," + y + "]");
 					tile.transform.setParent(layer.transform);
-					tile.transform.localPosition.set(x * tileSize.x, y * tileSize.y);
+					//tile.transform.localPosition.set(x * tileSize.x, y * tileSize.y);
+					tile.transform.localPosition = new Core.Vector2(x * tileSize.x, y * tileSize.y);
 
 					for (var k = 0; k < (i / 2 + 1); k++) {
 						var frame = Math.floor((1 - Math.pow(Math.random(), 4)) * 16);
 						var sprite = new Component.DisplaySprite(spriteSheet, frame);
 						sprite.paused = true;
-						sprite.offset.set(Math.random() * tileSize.x, Math.random() * tileSize.y);
+						//sprite.offset.set(Math.random() * tileSize.x, Math.random() * tileSize.y);
+						sprite.offset = new Core.Vector2(Math.random() * tileSize.x, Math.random() * tileSize.y);
+
 						sprite.rotation = Math.random() * 360;
 						var scale = (0.3 + (Math.random() * 0.7));
-						sprite.scale.set(scale, scale);
+						sprite.scale = new Core.Vector2(scale, scale);
+
 						tile.addComponent(sprite);
 					}
 				}
@@ -260,12 +315,12 @@ define(
 				[34, 138, 16, 21, 0, -4, 7], /* 125 '}' */
 				[56, 160, 20, 8, 0, -5, 0], /* 126 '~' */
 
-				[44, 0, 15, 24, 0, -5, 5], /* 162 '¢' */
-				[212, 113, 17, 21, 0, -3, 7], /* 163 '£' */
-				[106, 24, 20, 22, 0, -3, 7], /* 164 '¤' */
-				[106, 24, 20, 22, 0, -3, 7], /* 165 '¥' */
-				[60, 0, 14, 24, 0, -2, 5], /* 166 '¦' */
-				[0, 0, 26, 25, 0, -4, 4], /* 167 '§' */
+				[44, 0, 15, 24, 0, -5, 5], /* 162 'ï¿½' */
+				[212, 113, 17, 21, 0, -3, 7], /* 163 'ï¿½' */
+				[106, 24, 20, 22, 0, -3, 7], /* 164 'ï¿½' */
+				[106, 24, 20, 22, 0, -3, 7], /* 165 'ï¿½' */
+				[60, 0, 14, 24, 0, -2, 5], /* 166 'ï¿½' */
+				[0, 0, 26, 25, 0, -4, 4], /* 167 'ï¿½' */
 			],
 		};
 

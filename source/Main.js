@@ -1,3 +1,5 @@
+//NOTE to self: look at https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/seal
+
 require.config({
 	baseUrl: 'source',
 	shim: {

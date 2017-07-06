@@ -1,11 +1,11 @@
 define(
 	'Core/GameObject',
 	['Core', 'Component',
-		 'Core/Component', 'Component/Transform', 'Component/Transform'],
+		'Core/Component', 'Component/Transform', 'Component/Transform', 'Component/Rigidbody'],
 	function (Core, Component) {
 	"use strict";
 	function GameObject(name) {
-		this.name = name||'New GameObject';
+		this.name = name || 'New GameObject';
 		this.components = new Array();
 		this.transform = undefined;
 		this.addComponent(new Component.Transform());
@@ -19,15 +19,18 @@ define(
 
 				if (component instanceof Component.Transform) {
 					this.transform = component;
+				} else if (component instanceof Component.Rigidbody) {
+					this.rigidbody = component;
 				}
-			} else {
-				console.error("Not this.components.indexOf(component) == -1");
 			}
-		} else {
-			console.error("Not component instanceof Core.Component", component);
 		}
 		return this;
 	};
+
+	GameObject.prototype.getFirstComponentByType = function (type) {
+		var r = this.getComponentsByType(type);
+		return r[0];
+	}
 
 	GameObject.prototype.getComponentsByType = function (type) {
 		var r = [];
@@ -61,10 +64,14 @@ define(
 		return this.transform.getChildren();
 	};
 
-	GameObject.prototype.getScene = function() {
+	GameObject.prototype.getScene = function () {
 		var t = this.transform;
-		while (t.parent) { t = t.parent; }
-		if (t.gameObject instanceof Core.Scene) { return t.gameObject; }
+		while (t.parent) {
+			t = t.parent;
+		}
+		if (t.gameObject instanceof Core.Scene) {
+			return t.gameObject;
+		}
 		return null;
 	};
 
