@@ -17,6 +17,27 @@
     display: block;
     margin: 0px;
 	overflow: hidden;
+	background-image:
+      -moz-linear-gradient(45deg, #555 25%, transparent 25%), 
+      -moz-linear-gradient(-45deg, #555 25%, transparent 25%),
+      -moz-linear-gradient(45deg, transparent 75%, #555 75%),
+      -moz-linear-gradient(-45deg, transparent 75%, #555 75%);
+    background-image:
+      -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, #555), color-stop(.25, transparent)), 
+      -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, #555), color-stop(.25, transparent)),
+      -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, #555)),
+      -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, #555));
+
+    -moz-background-size:100px 100px;
+    background-size:50px 51px;
+	-webkit-background-size: 50px 51px;
+    background-position: 0 0, 25px 0, 25px -25px, 0px 25px;
+	background-color: #c7c7c7;
+	}
+	
+	canvas{
+	font-size: 0px;
+    line-height: 0px;
 	}
   </style>
 
@@ -24,12 +45,24 @@
 <body>
   <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
     <header></header>
-    <div role="main">
-        <canvas id="canvas"></canvas>
+    <div role="main" style="display: inline-table;font-size: 0px;line-height: 0px;">
+        <canvas id="stars"></canvas>
+		<canvas id="nebulaDensity1"></canvas>
+		<canvas id="nebula1"></canvas>
+		<canvas id="nebulaDensity2"></canvas>
+		<canvas id="nebula2"></canvas>
+		<canvas id="nebulaDensity3"></canvas>
+		<canvas id="nebula3"></canvas>
+		<canvas id="main"></canvas>
 		<script>
-			var c = document.getElementById("canvas");
-			c.width = window.innerWidth;
-			c.height = window.innerHeight;
+		var tx = 3;
+		var ty =3;
+			var cs = document.getElementsByTagName("canvas");
+			for (i=0;i<cs.length;i++) {
+				cs[i].width = window.innerWidth/tx;
+				cs[i].height = window.innerHeight/ty;
+			}
+			
 		</script>
     </div>
     <footer></footer>

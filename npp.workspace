@@ -56,6 +56,7 @@
             <Folder name="experimental">
                 <File name="source\experimental\x.camera.js" />
                 <File name="source\experimental\x.stars.js" />
+                <File name="source\experimental\x.nebula.js" />
             </Folder>
             <Folder name="libs">
                 <File name="source\libs\easeljs-0.8.2.combined.js" />
@@ -75,11 +76,20 @@
                 <File name="source\Script\CameraController.js" />
                 <File name="source\Script\Fps.js" />
             </Folder>
+            <Folder name="Random">
+                <File name="source\Random\SeedRandom.js" />
+            </Folder>
+            <Folder name="Noise">
+                <File name="source\Noise\josephg_noisejs.js" />
+                <File name="source\Noise\Perlin.js" />
+                <File name="source\Noise\Simplex.js" />
+            </Folder>
         </Folder>
         <File name="index.html" />
         <File name="LICENSE" />
         <File name="README.md" />
         <File name="x.camera.html" />
         <File name="x.stars.html" />
+        <File name="x.nebula.html" />
     </Project>
 </NotepadPlus>
